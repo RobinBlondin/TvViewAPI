@@ -6,10 +6,11 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 
 @Entity
+@Table(name = "_user")
 class User (
     private val email: String = "",
     private val displayName: String = "",
-    private var enable: Boolean = true
+    private var enabled: Boolean = true
 ): BaseEntity(), UserDetails {
     override fun getUsername(): String = email
 
@@ -23,5 +24,5 @@ class User (
 
     override fun isCredentialsNonExpired(): Boolean = true
 
-    override fun isEnabled(): Boolean = enable
+    override fun isEnabled(): Boolean = enabled
 }
