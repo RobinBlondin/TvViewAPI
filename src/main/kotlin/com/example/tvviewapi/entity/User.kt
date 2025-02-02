@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails
 @Entity
 class User (
     private val email: String = "",
+    private val displayName: String = "",
     private var enable: Boolean = true
 ): BaseEntity(), UserDetails {
     override fun getUsername(): String = email
