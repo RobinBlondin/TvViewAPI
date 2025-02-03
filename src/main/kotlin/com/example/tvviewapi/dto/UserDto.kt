@@ -3,7 +3,7 @@ package com.example.tvviewapi.dto
 import java.util.UUID
 
 data class UserDto(
-    private var id: UUID? = null,
-    private var email: String = "",
-    private var displayName: String = ""
+    var id: UUID? = null,
+    var email: String = "",
+    var displayName: String = ""
 )
