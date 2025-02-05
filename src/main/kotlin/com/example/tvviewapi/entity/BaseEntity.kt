@@ -9,11 +9,11 @@ import java.util.*
 abstract class BaseEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private val id: UUID = UUID.randomUUID(),
-    private var created: LocalDateTime = LocalDateTime.now(),
-    private var createdBy: String = "System",
-    private var updated: LocalDateTime = LocalDateTime.now(),
-    private var updatedBy: String = "System"
+    val id: UUID? = null,
+    var created: LocalDateTime = LocalDateTime.now(),
+    var createdBy: String = "System",
+    var updated: LocalDateTime = LocalDateTime.now(),
+    var updatedBy: String = "System"
 ) {
     @PrePersist
     fun onCreate() {
