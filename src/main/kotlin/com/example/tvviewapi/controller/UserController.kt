@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = ["*"])
 class UserController(val userService: UserService) {
 
     @PostMapping("/create")
