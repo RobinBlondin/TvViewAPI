@@ -1,7 +1,9 @@
 package com.example.tvviewapi.controller
 
 import com.example.tvviewapi.dto.UserDto
+import com.example.tvviewapi.response.UserResponse
 import com.example.tvviewapi.service.UserService
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -9,16 +11,20 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api/users")
 @CrossOrigin(origins = ["*"])
 class UserController(val userService: UserService) {
-    @PostMapping("/create")
-    fun create(@RequestBody userDto: UserDto): ResponseEntity<UserDto> {
-        val user = userService.findUserByEmail(userDto.email)
 
-        if(user == null) {
-            val dto = userService.create(userDto)
-            return ResponseEntity.ok(dto)
+    @PostMapping("/create")
+    fun create(userDto: UserDto): ResponseEntity<UserResponse> {
+
+        val user = userService.create(userDto)
+
+        if(user.isEmpty) {
+            return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(UserResponse("User already exists", null))
         }
 
-
-        return ResponseEntity.badRequest().body(user)
+        return ResponseEntity
+            .status(HttpStatus.CREATED)
+            .body(UserResponse("User created successfully", user.get()))
     }
 }
