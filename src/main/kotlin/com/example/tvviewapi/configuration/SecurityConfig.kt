@@ -15,6 +15,7 @@ class SecurityConfig {
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain =
         http
+            .csrf { it.disable() }
             .authorizeHttpRequests { auth ->
                 auth.requestMatchers(
                     "/swagger-ui.html",
@@ -29,17 +30,4 @@ class SecurityConfig {
                 it.failureUrl("/login-error")
             }
             .build()
-
-    @Bean
-    fun corsConfigurationSource(): UrlBasedCorsConfigurationSource {
-        val source = UrlBasedCorsConfigurationSource()
-        val config = CorsConfiguration().apply {
-            allowedOrigins = listOf("http://localhost:8080")
-            allowedMethods = listOf("GET", "POST", "PUT", "DELETE")
-            allowedHeaders = listOf("*")
-            allowCredentials = true
-        }
-        source.registerCorsConfiguration("/**", config)
-        return source
-    }
 }
