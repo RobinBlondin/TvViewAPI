@@ -1,6 +1,7 @@
 package com.example.tvviewapi.entity
 
 import jakarta.persistence.*
+import lombok.Data
 import org.springframework.security.core.context.SecurityContextHolder
 import java.time.LocalDateTime
 import java.util.*
@@ -9,7 +10,7 @@ import java.util.*
 abstract class BaseEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    val id: UUID? = null,
+    var id: UUID? = null,
     var created: LocalDateTime = LocalDateTime.now(),
     var createdBy: String = "System",
     var updated: LocalDateTime = LocalDateTime.now(),
