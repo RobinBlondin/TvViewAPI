@@ -5,45 +5,46 @@ import com.example.tvviewapi.service.UserService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.util.UUID
+import java.util.*
 
 @RestController
 @RequestMapping("/api/users")
-class UserController(val userService: UserService) {
+class UserController(
+    val service: UserService
+) {
 
     @GetMapping("all")
     fun getUsers(): ResponseEntity<Set<UserDto>> {
-        val users = userService.findAll()
+        val users = service.findAll()
 
         return ResponseEntity
-            .status(HttpStatus.OK)
+            .ok()
             .body(users)
     }
 
     @GetMapping("{email}")
-    fun getUserByEmail(@PathVariable email: String): ResponseEntity<UserDto> {
-        val user = userService.findUserByEmail(email)
+    fun getUserByEmail(@PathVariable email: String): ResponseEntity<UserDto> =
+        service.findUserByEmail(email)
+            .map { user -> ResponseEntity.status(HttpStatus.OK).body(user) }
+            .orElseGet { ResponseEntity.status(HttpStatus.NOT_FOUND).build() }
 
-        if(user.isEmpty) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null)
-        }
-
-        return ResponseEntity.status(HttpStatus.OK).body(user.get())
-    }
 
     @DeleteMapping("delete/{id}")
-    fun deleteById(@PathVariable id: UUID) = userService.deleteById(id)
+    fun deleteById(@PathVariable id: UUID): ResponseEntity<String> {
+        if(service.deleteById(id)) {
+            return ResponseEntity.ok().body("User deleted successfully")
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User could not be found")
+    }
 
-    @PutMapping("update")
+    @PutMapping("edit")
     fun updateUser(@RequestBody dto: UserDto): ResponseEntity<UserDto> {
         if(dto.id == null) {
             return ResponseEntity.badRequest().build()
         }
 
-        return userService.updateUser(dto)
-            .map { user ->
-                ResponseEntity.status(HttpStatus.OK).body(user)
-            }
+        return service.updateUser(dto)
+            .map { user -> ResponseEntity.status(HttpStatus.OK).body(user) }
             .orElseGet { ResponseEntity.status(HttpStatus.NOT_FOUND).build() }
 
     }
@@ -55,7 +56,7 @@ class UserController(val userService: UserService) {
             return ResponseEntity.badRequest().build()
         }
 
-        return userService.createUser(dto)
+        return service.createUser(dto)
             .map { user -> ResponseEntity.status(HttpStatus.CREATED).body(user) }
             .orElseGet { ResponseEntity.status(HttpStatus.CONFLICT).build() }
     }
