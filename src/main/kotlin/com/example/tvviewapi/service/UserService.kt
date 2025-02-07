@@ -7,12 +7,15 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class UserService(val userRepository: UserRepository, val userMapper: UserMapper) {
+class UserService(
+    val repo: UserRepository,
+    val userMapper: UserMapper
+) {
 
-    fun findAll(): Set<UserDto> = userRepository.findAll().map { userMapper.toDto(it) }.toSet()
+    fun findAll(): Set<UserDto> = repo.findAll().map { userMapper.toDto(it) }.toSet()
 
     fun findUserByEmail(email: String): Optional<UserDto> {
-        val user = userRepository.getUserByEmail(email)
+        val user = repo.getUserByEmail(email)
 
         if (user.isPresent) {
             return Optional.of(userMapper.toDto(user.get()))
@@ -21,24 +24,28 @@ class UserService(val userRepository: UserRepository, val userMapper: UserMapper
     }
 
     fun createUser(dto: UserDto): Optional<UserDto> {
-        if(userRepository.existsByEmail(dto.email)) {
+        if(repo.existsByEmail(dto.email) || (dto.id != null && repo.existsById(dto.id!!))) {
             return Optional.empty()
         }
 
-        val user = userMapper.toEntity(dto)
-        val saved = userRepository.save(user)
-        return Optional.of(userMapper.toDto(saved))
+        val entity = repo.save(userMapper.toEntity(dto))
+        return Optional.of(userMapper.toDto(entity))
     }
 
-    fun deleteById(id: UUID) = userRepository.deleteById(id)
+    fun deleteById(id: UUID): Boolean {
+        if(repo.existsById(id)) {
+            repo.deleteById(id)
+            return true
+        }
+        return false
+    }
 
     fun updateUser(dto: UserDto): Optional<UserDto> {
-        if(!userRepository.existsById(dto.id!!)) {
+        if(!repo.existsById(dto.id!!)) {
             return Optional.empty()
         }
 
-        val user = userMapper.toEntity(dto)
-        val saved = userRepository.save(user)
-        return Optional.of(userMapper.toDto(saved))
+        val entity = repo.save(userMapper.toEntity(dto))
+        return Optional.of(userMapper.toDto(entity))
     }
 }
