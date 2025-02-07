@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 
 @Entity
 class TvReminder(
-    private var title: String = "",
-    private var description: String = "",
-    private val expiryDate: LocalDateTime = LocalDateTime.now().plusDays(1)
+    var title: String = "",
+    var description: String = "",
+    val expiryDate: LocalDateTime = LocalDateTime.now().plusDays(1)
 ): BaseEntity()
