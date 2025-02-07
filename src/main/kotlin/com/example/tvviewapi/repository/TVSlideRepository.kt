@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
-interface TVSlideRepository: JpaRepository<TvSlide, UUID>
+interface TVSlideRepository: JpaRepository<TvSlide, UUID> {
+      fun existsByUrl(url: String): Boolean
+}
