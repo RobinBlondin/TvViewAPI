@@ -10,7 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails
 class User (
     var email: String = "",
     var displayName: String = "",
-    private var enabled: Boolean = true,
+    var enabled: Boolean = true,
 
 ): BaseEntity(), UserDetails {
     override fun getUsername(): String = email
