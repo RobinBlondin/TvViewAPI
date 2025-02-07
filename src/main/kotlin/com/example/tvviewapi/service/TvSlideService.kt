@@ -25,7 +25,6 @@ class TvSlideService(
 
       fun createTvSlide(dto: TvSlideDto): Optional<TvSlideDto> {
             if (repo.existsByUrl(dto.url) || (dto.id != null && repo.existsById(dto.id!!))) {
-                  println("User already exists")
                   return Optional.empty()
             }
 
