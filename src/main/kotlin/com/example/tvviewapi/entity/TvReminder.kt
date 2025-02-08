@@ -7,5 +7,6 @@ import java.time.LocalDateTime
 class TvReminder(
     var title: String = "",
     var description: String = "",
-    val expiryDate: LocalDateTime = LocalDateTime.now().plusDays(1)
+    var startDate: LocalDateTime = LocalDateTime.now(),
+    val expiryDate: LocalDateTime = startDate.plusDays(1)
 ): BaseEntity()
