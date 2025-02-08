@@ -1,7 +1,6 @@
 package com.example.tvviewapi.entity
 
 import jakarta.persistence.*
-import lombok.Data
 import org.springframework.security.core.context.SecurityContextHolder
 import java.time.LocalDateTime
 import java.util.*
