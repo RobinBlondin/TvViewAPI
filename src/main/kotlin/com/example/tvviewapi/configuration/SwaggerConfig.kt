@@ -2,22 +2,41 @@ package com.example.tvviewapi.configuration
 
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.info.Info
-import io.swagger.v3.oas.models.servers.Server
+import io.swagger.v3.oas.models.security.OAuthFlow
+import io.swagger.v3.oas.models.security.OAuthFlows
+import io.swagger.v3.oas.models.security.Scopes
+import io.swagger.v3.oas.models.security.SecurityRequirement
+import io.swagger.v3.oas.models.security.SecurityScheme
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
-class SwaggerConfig {
+class OpenApiConfig {
 
     @Bean
-    fun customOpenAPI(): OpenAPI {
+    fun openAPI(): OpenAPI {
         return OpenAPI()
-            .addServersItem(Server().url("http://localhost:8080").description("Local Server"))
-            .info(
-                Info()
-                    .title("API Documentation")
-                    .description("Description of the API")
-                    .version("1.0")
+            .info(Info().title("Google OAuth2 API").version("1.0"))
+            .components(
+                io.swagger.v3.oas.models.Components().addSecuritySchemes(
+                    "google-oauth2",
+                    SecurityScheme()
+                        .type(SecurityScheme.Type.OAUTH2)
+                        .flows(
+                            OAuthFlows().authorizationCode(
+                                OAuthFlow()
+                                    .authorizationUrl("https://accounts.google.com/o/oauth2/auth") // Google Auth URL
+                                    .tokenUrl("https://oauth2.googleapis.com/token") // Google Token URL
+                                    .scopes(
+                                        Scopes()
+                                            .addString("openid", "OpenID Connect scope")
+                                            .addString("email", "Access user email")
+                                            .addString("profile", "Access user profile information")
+                                    )
+                            )
+                        )
+                )
             )
+            .addSecurityItem(SecurityRequirement().addList("google-oauth2"))
     }
 }
