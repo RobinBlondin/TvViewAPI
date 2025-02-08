@@ -1,6 +1,5 @@
 package com.example.tvviewapi.controller
 
-import com.example.tvviewapi.dto.TvReminderDto
 import com.example.tvviewapi.dto.TvSlideDto
 import com.example.tvviewapi.service.TvSlideService
 import org.springframework.http.HttpStatus

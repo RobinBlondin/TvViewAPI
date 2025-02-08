@@ -1,7 +1,6 @@
 package com.example.tvviewapi.configuration
 
 import com.example.tvviewapi.service.UserService
-import lombok.RequiredArgsConstructor
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -16,7 +15,8 @@ import org.springframework.security.web.SecurityFilterChain
 @Configuration
 @EnableWebSecurity
 class SecurityConfig(
-    private val userService: UserService
+    private val userService: UserService,
+    private val customOAuth2SuccessHandler: CustomOAuth2SuccessHandler
 ) {
 
     @Bean
@@ -33,10 +33,9 @@ class SecurityConfig(
                     .anyRequest().authenticated()
             }
             .oauth2Login{
-                login -> login
-                        .defaultSuccessUrl("/api/users/test", true)
-                        .failureUrl("/swagger-ui.html")
+                it.successHandler(customOAuth2SuccessHandler)
             }
+
             .oauth2ResourceServer { oauth2 ->
                 oauth2.jwt { jwt ->
                     jwt.jwtAuthenticationConverter { token ->

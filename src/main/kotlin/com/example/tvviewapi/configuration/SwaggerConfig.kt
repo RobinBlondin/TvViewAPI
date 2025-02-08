@@ -25,8 +25,8 @@ class OpenApiConfig {
                         .flows(
                             OAuthFlows().authorizationCode(
                                 OAuthFlow()
-                                    .authorizationUrl("https://accounts.google.com/o/oauth2/auth") // Google Auth URL
-                                    .tokenUrl("https://oauth2.googleapis.com/token") // Google Token URL
+                                    .authorizationUrl("https://accounts.google.com/o/oauth2/auth")
+                                    .tokenUrl("https://oauth2.googleapis.com/token")
                                     .scopes(
                                         Scopes()
                                             .addString("openid", "OpenID Connect scope")
