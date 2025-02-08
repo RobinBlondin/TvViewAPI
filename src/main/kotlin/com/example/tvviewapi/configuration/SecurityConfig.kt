@@ -25,24 +25,16 @@ class SecurityConfig(
             .csrf { csrf -> csrf.disable() }
             .authorizeHttpRequests { auth ->
                 auth
-                    .requestMatchers(
-                        "/swagger-ui/**",
-                        "/v3/api-docs/**",
-                        "/api/users/test"
-                    ).permitAll()
                     .anyRequest().authenticated()
             }
             .oauth2Login{
                 it.successHandler(customOAuth2SuccessHandler)
             }
-
             .oauth2ResourceServer { oauth2 ->
                 oauth2.jwt { jwt ->
                     jwt.jwtAuthenticationConverter { token ->
                         val claims = token.claims
-                        val email = claims["email"] as? String
-
-                        println("Email: $email")
+                    val email = claims["email"] as? String
 
                         if (email != null && userService.isRegisteredUser(email)) {
                             UsernamePasswordAuthenticationToken(
