@@ -30,7 +30,6 @@ class CustomOAuth2SuccessHandler(
                   response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized email")
                   return
             }
-
-            response.sendRedirect("/api/users/test")
+            response.sendRedirect("/api/users/success")
       }
 }

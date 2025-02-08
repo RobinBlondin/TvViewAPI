@@ -14,26 +14,13 @@ class UserController(
 ) {
 
     @GetMapping("all")
-    fun getUsers(): ResponseEntity<Set<UserDto>> {
-        val users = service.findAll()
-
-        return ResponseEntity
-            .ok()
-            .body(users)
-    }
+    fun getUsers(): ResponseEntity<Set<UserDto>> = ResponseEntity.ok().body(service.findAll())
 
     @GetMapping("{email}")
     fun getUserByEmail(@PathVariable email: String): ResponseEntity<UserDto> =
         service.findUserByEmail(email)
             .map { user -> ResponseEntity.status(HttpStatus.OK).body(user) }
             .orElseGet { ResponseEntity.status(HttpStatus.NOT_FOUND).build() }
-
-    @GetMapping("test")
-    fun printLine(): ResponseEntity<String> {
-        println("Here I am")
-        return ResponseEntity.ok().body("Bye bye")
-    }
-
 
     @DeleteMapping("delete/{id}")
     fun deleteById(@PathVariable id: UUID): ResponseEntity<String> {
@@ -45,20 +32,18 @@ class UserController(
 
     @PutMapping("edit")
     fun updateUser(@RequestBody dto: UserDto): ResponseEntity<UserDto> {
-        if(dto.id == null) {
+        if(dto.id == null || isNotValidDto(dto)) {
             return ResponseEntity.badRequest().build()
         }
 
         return service.updateUser(dto)
             .map { user -> ResponseEntity.status(HttpStatus.OK).body(user) }
             .orElseGet { ResponseEntity.status(HttpStatus.NOT_FOUND).build() }
-
     }
-
 
     @PostMapping("/create")
     fun createUser(@RequestBody dto: UserDto): ResponseEntity<UserDto> {
-        if(dto.email.isEmpty()) {
+        if(isNotValidDto(dto)) {
             return ResponseEntity.badRequest().build()
         }
 
@@ -67,9 +52,8 @@ class UserController(
             .orElseGet { ResponseEntity.status(HttpStatus.CONFLICT).build() }
     }
 
+    @GetMapping("/success")
+    fun onSuccessfulAuth(): ResponseEntity<String> = ResponseEntity.ok().body("Authorization successful")
 
-
-
-
-
+    private fun isNotValidDto(dto: UserDto) = dto.email.isEmpty() || dto.displayName.isEmpty()
 }
