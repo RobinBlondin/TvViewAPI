@@ -50,4 +50,7 @@ class UserService(
         val entity = repo.save(userMapper.toEntity(dto))
         return Optional.of(userMapper.toDto(entity))
     }
+
+    fun getUserEmails(): Set<String> = repo.findAll().map { it.email }.toSet()
+
 }
