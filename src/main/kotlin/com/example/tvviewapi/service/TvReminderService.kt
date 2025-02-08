@@ -20,7 +20,12 @@ class TvReminderService(
             return tvReminderMapper.toDto(entity)
       }
 
-      fun updateReminder(dto: TvReminderDto): TvReminderDto = createReminder(dto)
+      fun updateReminder(dto: TvReminderDto): Optional<TvReminderDto> {
+            if(!repo.existsById(dto.id!!)) {
+                  return Optional.empty()
+            }
+            return Optional.of(createReminder(dto))
+      }
 
       fun deleteReminderById(id: UUID): Boolean {
             if(repo.existsById(id)) {

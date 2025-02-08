@@ -23,7 +23,7 @@ class TvReminderController(
 
       @PostMapping("create")
       fun createReminder(@RequestBody dto: TvReminderDto): ResponseEntity<TvReminderDto> {
-            if(isNotValidDto(dto)) {
+            if(dto.id != null || isNotValidDto(dto)) {
                   return ResponseEntity.badRequest().build()
             }
 
@@ -36,7 +36,8 @@ class TvReminderController(
                   return ResponseEntity.badRequest().build()
             }
 
-            return ResponseEntity.ok().body(service.updateReminder(dto))
+            return service.updateReminder(dto).map { reminder -> ResponseEntity.ok().body(reminder) }
+                  .orElseGet { ResponseEntity.notFound().build() }
       }
 
       @DeleteMapping("delete/{id}")
