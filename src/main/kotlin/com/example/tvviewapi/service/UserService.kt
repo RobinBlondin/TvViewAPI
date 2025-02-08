@@ -14,6 +14,8 @@ class UserService(
 
     fun findAll(): Set<UserDto> = repo.findAll().map { userMapper.toDto(it) }.toSet()
 
+    fun isRegisteredUser(email: String): Boolean = repo.existsByEmail(email)
+
     fun findUserByEmail(email: String): Optional<UserDto> {
         val user = repo.getUserByEmail(email)
 
