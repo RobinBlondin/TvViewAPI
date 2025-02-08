@@ -52,8 +52,5 @@ class UserController(
             .orElseGet { ResponseEntity.status(HttpStatus.CONFLICT).build() }
     }
 
-    @GetMapping("/success")
-    fun onSuccessfulAuth(): ResponseEntity<String> = ResponseEntity.ok().body("Authorization successful")
-
     private fun isNotValidDto(dto: UserDto) = dto.email.isEmpty() || dto.displayName.isEmpty()
 }
