@@ -28,6 +28,12 @@ class UserController(
             .map { user -> ResponseEntity.status(HttpStatus.OK).body(user) }
             .orElseGet { ResponseEntity.status(HttpStatus.NOT_FOUND).build() }
 
+    @GetMapping("test")
+    fun printLine(): ResponseEntity<String> {
+        println("Here I am")
+        return ResponseEntity.ok().body("Bye bye")
+    }
+
 
     @DeleteMapping("delete/{id}")
     fun deleteById(@PathVariable id: UUID): ResponseEntity<String> {
