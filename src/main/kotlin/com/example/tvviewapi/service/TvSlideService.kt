@@ -12,19 +12,12 @@ class TvSlideService(
       val tvSlideMapper: TvSlideMapper
 ) {
 
-      fun getAllTvSlides(): Set<TvSlideDto> = repo.findAll().map { tvSlideMapper.toDto(it) }.toSet()
+      fun getAllSlides(): Set<TvSlideDto> = repo.findAll().map { tvSlideMapper.toDto(it) }.toSet()
 
-      fun getTvSlideById(id: UUID): Optional<TvSlideDto> {
-            if (!repo.existsById(id)) {
-                  return Optional.empty()
-            }
+      fun getSlideById(id: UUID): Optional<TvSlideDto> = repo.findById(id).map { tvSlideMapper.toDto(it) }
 
-            val dto = tvSlideMapper.toDto(repo.findById(id).get())
-            return Optional.of(dto)
-      }
-
-      fun createTvSlide(dto: TvSlideDto): Optional<TvSlideDto> {
-            if (repo.existsByUrl(dto.url) || (dto.id != null && repo.existsById(dto.id!!))) {
+      fun createSlide(dto: TvSlideDto): Optional<TvSlideDto> {
+            if (repo.existsByUrl(dto.url)) {
                   return Optional.empty()
             }
 
@@ -32,7 +25,7 @@ class TvSlideService(
             return Optional.of(tvSlideMapper.toDto(entity))
       }
 
-      fun deleteTvSlideById(id: UUID): Boolean {
+      fun deleteSlideById(id: UUID): Boolean {
             if (repo.existsById(id)) {
                   repo.deleteById(id)
                   return true
@@ -40,7 +33,7 @@ class TvSlideService(
             return false
       }
 
-      fun updateTvSlide(dto: TvSlideDto): Optional<TvSlideDto> {
+      fun updateSlide(dto: TvSlideDto): Optional<TvSlideDto> {
             if(!repo.existsById(dto.id!!)) {
                   return Optional.empty()
             }

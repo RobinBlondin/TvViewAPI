@@ -1,12 +1,13 @@
 package com.example.tvviewapi.controller
 
+import com.example.tvviewapi.dto.TvReminderDto
 import com.example.tvviewapi.dto.TvSlideDto
 import com.example.tvviewapi.service.TvSlideService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.*
-import kotlin.jvm.optionals.getOrElse
+import kotlin.jvm.optionals.getOrNull
 
 @RestController
 @RequestMapping("/api/slides")
@@ -15,26 +16,25 @@ class TvSlideController(
 ) {
 
       @GetMapping("all")
-      fun getTvSlides(): ResponseEntity<Set<TvSlideDto>> = ResponseEntity.ok(service.getAllTvSlides())
+      fun getAllSlides(): ResponseEntity<Set<TvSlideDto>> = ResponseEntity.ok().body(service.getAllSlides())
 
       @GetMapping("{id}")
-      fun getTvSlideById(@PathVariable id: UUID): ResponseEntity<TvSlideDto> =
-            service.getTvSlideById(id).map { slide -> ResponseEntity.ok().body(slide) }
-                  .getOrElse { ResponseEntity.notFound().build() }
+      fun getSlideById(@PathVariable id: UUID): ResponseEntity<TvSlideDto> =
+            service.getSlideById(id).map { slide -> ResponseEntity.ok().body(slide) }
+                  .orElseGet { ResponseEntity.notFound().build() }
 
       @PostMapping("create")
-      fun createTvSlide(@RequestBody dto: TvSlideDto): ResponseEntity<TvSlideDto> {
-            if(dto.url.isEmpty()) {
+      fun createSlide(@RequestBody dto: TvSlideDto): ResponseEntity<TvSlideDto> {
+            if(isNotValidDto(dto)) {
                   return ResponseEntity.badRequest().build()
             }
 
-            return service.createTvSlide(dto).map { slide -> ResponseEntity.ok().body(slide) }
-                  .getOrElse { ResponseEntity.status(HttpStatus.CONFLICT).build() }
+            return ResponseEntity.ok().body(service.createSlide(dto).getOrNull())
       }
 
       @DeleteMapping("delete/{id}")
-      fun deleteTvSlideById(@PathVariable id: UUID) : ResponseEntity<String> {
-            if(service.deleteTvSlideById(id)) {
+      fun deleteSlideById(@PathVariable id: UUID) : ResponseEntity<String> {
+            if(service.deleteSlideById(id)) {
                   return ResponseEntity.ok().body("TvSlide deleted successfully")
             }
 
@@ -42,12 +42,14 @@ class TvSlideController(
       }
 
       @PutMapping("edit")
-      fun updateTvSlide(@RequestBody dto: TvSlideDto): ResponseEntity<TvSlideDto> {
+      fun updateSlide(@RequestBody dto: TvSlideDto): ResponseEntity<TvSlideDto> {
             if(dto.id == null) {
                   return ResponseEntity.badRequest().build()
             }
 
-            return service.updateTvSlide(dto).map { slide -> ResponseEntity.ok().body(slide) }
+            return service.updateSlide(dto).map { slide -> ResponseEntity.ok().body(slide) }
                   .orElseGet { ResponseEntity.notFound().build() }
       }
+
+      private fun isNotValidDto(dto: TvSlideDto): Boolean = dto.url.isEmpty() || dto.id != null
 }
