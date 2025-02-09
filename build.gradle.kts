@@ -5,6 +5,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
     id("org.jetbrains.kotlin.kapt") version "1.9.25"
     kotlin("plugin.jpa") version "1.9.25"
+    kotlin("plugin.serialization") version "1.9.0"
 }
 
 
@@ -41,11 +42,13 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:2.18.2")
     implementation("io.github.cdimascio:dotenv-java:latest.release")
     implementation("org.mapstruct:mapstruct:latest.release")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
     kapt("org.mapstruct:mapstruct-processor:latest.release")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     compileOnly("org.projectlombok:lombok")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     runtimeOnly("org.postgresql:postgresql")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
     annotationProcessor("org.projectlombok:lombok")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
