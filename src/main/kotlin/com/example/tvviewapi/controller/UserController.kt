@@ -19,32 +19,32 @@ class UserController(
     @GetMapping("{email}")
     fun getUserByEmail(@PathVariable email: String): ResponseEntity<UserDto> =
         service.findUserByEmail(email)
-            .map { user -> ResponseEntity.status(HttpStatus.OK).body(user) }
-            .orElseGet { ResponseEntity.status(HttpStatus.NOT_FOUND).build() }
+            .map { user -> ResponseEntity.ok().body(user) }
+            .orElseGet { ResponseEntity.notFound().header("X-Request-ID", "Input data did not match an existing User").build() }
 
     @DeleteMapping("delete/{id}")
     fun deleteById(@PathVariable id: UUID): ResponseEntity<String> {
         if(service.deleteById(id)) {
             return ResponseEntity.ok().body("User deleted successfully")
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User could not be found")
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Input data did not match an existing User")
     }
 
     @PutMapping("edit")
     fun updateUser(@RequestBody dto: UserDto): ResponseEntity<UserDto> {
         if(dto.id == null || isNotValidDto(dto)) {
-            return ResponseEntity.badRequest().build()
+            return ResponseEntity.badRequest().header("X-Request-ID", "Input data does not meet requirements").build()
         }
 
         return service.updateUser(dto)
-            .map { user -> ResponseEntity.status(HttpStatus.OK).body(user) }
-            .orElseGet { ResponseEntity.status(HttpStatus.NOT_FOUND).build() }
+            .map { user -> ResponseEntity.ok().body(user) }
+            .orElseGet { ResponseEntity.notFound().header("X-Request-ID", "Input data did not match an existing User").build()}
     }
 
     @PostMapping("/create")
     fun createUser(@RequestBody dto: UserDto): ResponseEntity<UserDto> {
-        if(isNotValidDto(dto)) {
-            return ResponseEntity.badRequest().build()
+        if(dto.id != null || isNotValidDto(dto)) {
+            return ResponseEntity.badRequest().header("X-Request-ID", "Input data does not meet requirements").build()
         }
 
         return service.createUser(dto)

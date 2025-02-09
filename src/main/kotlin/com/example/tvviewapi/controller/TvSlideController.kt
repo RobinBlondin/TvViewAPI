@@ -20,12 +20,12 @@ class TvSlideController(
       @GetMapping("{id}")
       fun getSlideById(@PathVariable id: UUID): ResponseEntity<TvSlideDto> =
             service.getSlideById(id).map { slide -> ResponseEntity.ok().body(slide) }
-                  .orElseGet { ResponseEntity.notFound().build() }
+                  .orElseGet { ResponseEntity.notFound().header("X-Request-ID", "Input data did not match an existing TvSlide").build() }
 
       @PostMapping("create")
       fun createSlide(@RequestBody dto: TvSlideDto): ResponseEntity<TvSlideDto> {
             if(isNotValidDto(dto)) {
-                  return ResponseEntity.badRequest().build()
+                  return ResponseEntity.badRequest().header("X-Request-ID", "Input data does not meet requirements").build()
             }
 
             return ResponseEntity.ok().body(service.createSlide(dto).getOrNull())
@@ -37,17 +37,17 @@ class TvSlideController(
                   return ResponseEntity.ok().body("TvSlide deleted successfully")
             }
 
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("TvSlide not found")
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Input data did not match an existing TvSlide")
       }
 
       @PutMapping("edit")
       fun updateSlide(@RequestBody dto: TvSlideDto): ResponseEntity<TvSlideDto> {
             if(dto.id == null) {
-                  return ResponseEntity.badRequest().build()
+                  return ResponseEntity.badRequest().header("X-Request-ID", "Input data does not meet requirements").build()
             }
 
             return service.updateSlide(dto).map { slide -> ResponseEntity.ok().body(slide) }
-                  .orElseGet { ResponseEntity.notFound().build() }
+                  .orElseGet { ResponseEntity.notFound().header("X-Request-ID", "Input data did not match an existing TvSlide").build() }
       }
 
       private fun isNotValidDto(dto: TvSlideDto): Boolean = dto.url.isEmpty() || dto.id != null

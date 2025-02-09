@@ -19,12 +19,12 @@ class TvReminderController(
       @GetMapping("{id}")
       fun getReminderById(@PathVariable id: UUID):ResponseEntity<TvReminderDto> =
             service.getReminderById(id).map { reminder -> ResponseEntity.ok().body(reminder) }
-                  .orElseGet { ResponseEntity.notFound().build() }
+                  .orElseGet { ResponseEntity.notFound().header("X-Request-ID", "Input data did not match an existing TvReminder").build() }
 
       @PostMapping("create")
       fun createReminder(@RequestBody dto: TvReminderDto): ResponseEntity<TvReminderDto> {
             if(dto.id != null || isNotValidDto(dto)) {
-                  return ResponseEntity.badRequest().build()
+                  return ResponseEntity.badRequest().header("X-Request-ID", "Input data does not meet requirements").build()
             }
 
             return ResponseEntity.ok().body(service.createReminder(dto))
@@ -33,11 +33,11 @@ class TvReminderController(
       @PutMapping("edit")
       fun updateReminder(@RequestBody dto: TvReminderDto): ResponseEntity<TvReminderDto> {
             if(dto.id == null || isNotValidDto(dto)) {
-                  return ResponseEntity.badRequest().build()
+                  return ResponseEntity.badRequest().header("X-Request-ID", "Input data does not meet requirements").build()
             }
 
             return service.updateReminder(dto).map { reminder -> ResponseEntity.ok().body(reminder) }
-                  .orElseGet { ResponseEntity.notFound().build() }
+                  .orElseGet { ResponseEntity.notFound().header("X-Request-ID", "Input data did not match an existing TvReminder").build() }
       }
 
       @DeleteMapping("delete/{id}")
@@ -45,7 +45,7 @@ class TvReminderController(
             if(service.deleteReminderById(id)) {
                   return ResponseEntity.ok().body("Reminder deleted successfully")
             }
-            return ResponseEntity.ok().body("Reminder was not found")
+            return ResponseEntity.ok().body("Input data did not match an existing TvReminder")
       }
 
       private fun isNotValidDto(dto: TvReminderDto): Boolean = dto.title.isEmpty() || dto.description.isEmpty()
