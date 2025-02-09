@@ -38,7 +38,7 @@ class UserController(
 
         return service.updateUser(dto)
             .map { user -> ResponseEntity.ok().body(user) }
-            .orElseGet { ResponseEntity.notFound().header("X-Request-ID", "Input data did not match an existing User").build()}
+            .orElseGet { ResponseEntity.notFound().header("X-Request-ID", "Input data did not match an existing User ").build()}
     }
 
     @PostMapping("/create")

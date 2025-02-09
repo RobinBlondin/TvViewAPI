@@ -24,7 +24,7 @@ class TvSlideController(
 
       @PostMapping("create")
       fun createSlide(@RequestBody dto: TvSlideDto): ResponseEntity<TvSlideDto> {
-            if(isNotValidDto(dto)) {
+            if(dto.id != null || isNotValidDto(dto)) {
                   return ResponseEntity.badRequest().header("X-Request-ID", "Input data does not meet requirements").build()
             }
 
@@ -42,7 +42,7 @@ class TvSlideController(
 
       @PutMapping("edit")
       fun updateSlide(@RequestBody dto: TvSlideDto): ResponseEntity<TvSlideDto> {
-            if(dto.id == null) {
+            if(dto.id == null || isNotValidDto(dto)) {
                   return ResponseEntity.badRequest().header("X-Request-ID", "Input data does not meet requirements").build()
             }
 
@@ -50,5 +50,5 @@ class TvSlideController(
                   .orElseGet { ResponseEntity.notFound().header("X-Request-ID", "Input data did not match an existing TvSlide").build() }
       }
 
-      private fun isNotValidDto(dto: TvSlideDto): Boolean = dto.url.isEmpty() || dto.id != null
+      private fun isNotValidDto(dto: TvSlideDto): Boolean = dto.url.isEmpty()
 }
