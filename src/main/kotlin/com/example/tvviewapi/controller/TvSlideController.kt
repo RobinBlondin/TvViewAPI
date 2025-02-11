@@ -2,6 +2,7 @@ package com.example.tvviewapi.controller
 
 import com.example.tvviewapi.dto.TvSlideDto
 import com.example.tvviewapi.service.TvSlideService
+import com.example.tvviewapi.service.WebSocketService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -11,15 +12,16 @@ import kotlin.jvm.optionals.getOrNull
 @RestController
 @RequestMapping("/api/slides")
 class TvSlideController(
-      val service: TvSlideService
+      private val tvSlideService: TvSlideService,
+      private val webSocketService: WebSocketService
 ) {
 
       @GetMapping("all")
-      fun getAllSlides(): ResponseEntity<Set<TvSlideDto>> = ResponseEntity.ok().body(service.getAllSlides())
+      fun getAllSlides(): ResponseEntity<Set<TvSlideDto>> = ResponseEntity.ok().body(tvSlideService.getAllSlides())
 
       @GetMapping("{id}")
       fun getSlideById(@PathVariable id: UUID): ResponseEntity<TvSlideDto> =
-            service.getSlideById(id).map { slide -> ResponseEntity.ok().body(slide) }
+            tvSlideService.getSlideById(id).map { slide -> ResponseEntity.ok().body(slide) }
                   .orElseGet { ResponseEntity.notFound().header("X-Request-ID", "Input data did not match an existing TvSlide").build() }
 
       @PostMapping("create")
@@ -28,12 +30,18 @@ class TvSlideController(
                   return ResponseEntity.badRequest().header("X-Request-ID", "Input data does not meet requirements").build()
             }
 
-            return ResponseEntity.ok().body(service.createSlide(dto).getOrNull())
+            val saved = tvSlideService.createSlide(dto)
+
+            if(saved.isPresent) {
+                  webSocketService.sendRefreshSignal()
+                  return ResponseEntity.ok().body(saved.get())
+            }
+            return ResponseEntity.status(HttpStatus.CONFLICT).header("X-Request-ID", "TvSlide already exists in database").build()
       }
 
       @DeleteMapping("delete/{id}")
       fun deleteSlideById(@PathVariable id: UUID) : ResponseEntity<String> {
-            if(service.deleteSlideById(id)) {
+            if(tvSlideService.deleteSlideById(id)) {
                   return ResponseEntity.ok().body("TvSlide deleted successfully")
             }
 
@@ -46,7 +54,7 @@ class TvSlideController(
                   return ResponseEntity.badRequest().header("X-Request-ID", "Input data does not meet requirements").build()
             }
 
-            return service.updateSlide(dto).map { slide -> ResponseEntity.ok().body(slide) }
+            return tvSlideService.updateSlide(dto).map { slide -> ResponseEntity.ok().body(slide) }
                   .orElseGet { ResponseEntity.notFound().header("X-Request-ID", "Input data did not match an existing TvSlide").build() }
       }
 
