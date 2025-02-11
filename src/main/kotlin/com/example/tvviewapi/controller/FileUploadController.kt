@@ -15,23 +15,30 @@ import kotlin.io.path.exists
 @RequestMapping("/api/files")
 class FileUploadController {
 
-      private val uploadDir = Paths.get("uploads/slides")
+      private val uploadDir = Paths.get("uploads/slides/")
 
       init {
             if(!uploadDir.exists()) {
-                  Files.createDirectory(uploadDir)
+                  Files.createDirectories(uploadDir)
             }
       }
 
       @PostMapping("upload")
       fun uploadFile(@RequestParam("file") file: MultipartFile): ResponseEntity<String> {
+
+            if(file.contentType?.contains("image") != true) {
+                  return ResponseEntity.badRequest()
+                        .header("X-Request-ID", "File type is not valid")
+                        .build()
+            }
+
             val timestamp = LocalDateTime.now().toString().replace(":", "-")
             val fileName = "$timestamp-${file.originalFilename}"
             val filePath = uploadDir.resolve(fileName)
 
             Files.copy(file.inputStream, filePath)
 
-            val storedUrl = "/$filePath/$fileName"
+            val storedUrl = "/$filePath$fileName"
             return ResponseEntity.ok().body(storedUrl)
       }
 }
