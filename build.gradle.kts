@@ -43,6 +43,7 @@ dependencies {
     implementation("io.github.cdimascio:dotenv-java:latest.release")
     implementation("org.mapstruct:mapstruct:latest.release")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("org.springframework.boot:spring-boot-starter-websocket:3.4.2")
     kapt("org.mapstruct:mapstruct-processor:latest.release")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     compileOnly("org.projectlombok:lombok")
