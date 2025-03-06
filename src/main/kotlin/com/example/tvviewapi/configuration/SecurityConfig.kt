@@ -11,47 +11,63 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.CorsConfigurationSource
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource
+
 
 @Configuration
 @EnableWebSecurity
 class SecurityConfig(
-    private val userService: UserService,
-    private val customOAuth2SuccessHandler: CustomOAuth2SuccessHandler
+      private val userService: UserService
 ) {
 
-    @Bean
-    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain =
-        http
-            .csrf { csrf -> csrf.disable() }
-            .authorizeHttpRequests { auth ->
-                auth
-                    .anyRequest().authenticated()
-            }
-            .oauth2Login{
-                it.successHandler(customOAuth2SuccessHandler)
-            }
-            .oauth2ResourceServer { oauth2 ->
-                oauth2.jwt { jwt ->
-                    jwt.jwtAuthenticationConverter { token ->
-                        val claims = token.claims
-                    val email = claims["email"] as? String
+      @Bean
+      fun securityFilterChain(http: HttpSecurity): SecurityFilterChain =
+            http
+                  .cors { cors -> cors.configurationSource(corsConfigurationSource()) }
+                  .csrf { csrf -> csrf.ignoringRequestMatchers("/auth/google") }
+                  .authorizeHttpRequests { auth ->
+                        auth
+                              .requestMatchers("/auth/google").permitAll()
+                              .anyRequest().authenticated()
+                  }
+                  .oauth2ResourceServer { oauth2 ->
+                        oauth2.jwt { jwt ->
+                              jwt.jwtAuthenticationConverter { token ->
+                                    val claims = token.claims
+                                    val email = claims["email"] as? String
 
-                        if (email != null && userService.isRegisteredUser(email)) {
-                            UsernamePasswordAuthenticationToken(
-                                email,
-                                token,
-                                listOf(SimpleGrantedAuthority("USER"))
-                            )
-                        } else {
-                            throw UsernameNotFoundException("Unauthorized user")
+                                    if (email != null && userService.isRegisteredUser(email)) {
+                                          UsernamePasswordAuthenticationToken(
+                                                email,
+                                                token,
+                                                listOf(SimpleGrantedAuthority("USER"))
+                                          )
+                                    } else {
+                                          throw UsernameNotFoundException("Unauthorized user")
+                                    }
+                              }
                         }
-                    }
-                }
-            }
-            .build()
+                  }
+                  .build()
 
-    @Bean
-    fun jwtDecoder(): JwtDecoder {
-        return NimbusJwtDecoder.withJwkSetUri("https://www.googleapis.com/oauth2/v3/certs").build()
-    }
+      @Bean
+      fun jwtDecoder(): JwtDecoder {
+            return NimbusJwtDecoder.withJwkSetUri("https://www.googleapis.com/oauth2/v3/certs").build()
+      }
+
+      @Bean
+      fun corsConfigurationSource(): CorsConfigurationSource {
+            val configuration = CorsConfiguration()
+            configuration.allowedOrigins = listOf("http://localhost:5173") // Allow frontend domain
+            configuration.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
+            configuration.allowedHeaders = listOf("*")
+            configuration.allowCredentials = true
+
+            val source: UrlBasedCorsConfigurationSource = UrlBasedCorsConfigurationSource()
+            source.registerCorsConfiguration("/**", configuration)
+            return source
+      }
+
 }
