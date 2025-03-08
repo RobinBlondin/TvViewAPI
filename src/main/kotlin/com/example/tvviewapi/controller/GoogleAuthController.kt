@@ -47,6 +47,9 @@ class GoogleAuthController(private val userService: UserService) {
             val accessToken = tokenResponse.body?.get("access_token") as? String
                   ?: return ResponseEntity.badRequest().body(mapOf("error" to "Invalid token response"))
 
+            val idToken = tokenResponse.body?.get("id_token") as? String
+                  ?: return ResponseEntity.badRequest().body(mapOf("error" to "Invalid token response"))
+
             // Step 2: Use access token to get user info
             val userInfoHeaders = HttpHeaders()
             userInfoHeaders.setBearerAuth(accessToken)
@@ -65,6 +68,7 @@ class GoogleAuthController(private val userService: UserService) {
             }
 
             val userInfo = userInfoResponse.body!!
+            println(userInfo)
             val email = userInfo["email"] as? String ?: return ResponseEntity.badRequest().body(mapOf("error" to "No email found"))
             val name = userInfo["name"] as? String ?: "Unknown"
             val picture = userInfo["picture"] as? String ?: ""
@@ -78,6 +82,7 @@ class GoogleAuthController(private val userService: UserService) {
             return ResponseEntity.ok(
                   mapOf(
                         "access_token" to accessToken,
+                        "id_token" to idToken,
                         "email" to email,
                         "name" to name,
                         "picture" to picture
