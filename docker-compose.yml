@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  backend:
+    image: openjdk:21
+    container_name: TvViewAPI
+    working_dir: /app
+    volumes:
+      - ./uploads:/uploads  # Mount the uploads folder
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    ports:
+      - "8080:8080"
+    command: ["java", "-jar", "TvViewAPI-0.0.1-SNAPSHOT.jar"]
+
+  nginx:
+    build: .
+    container_name: nginx_server
+    volumes:
+      - ./uploads:/uploads  # Mount the uploads folder
+    ports:
+      - "8081:80"

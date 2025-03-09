@@ -11,9 +11,9 @@ abstract class BaseEntity(
     @GeneratedValue(strategy = GenerationType.UUID)
     var id: UUID? = null,
     var created: LocalDateTime = LocalDateTime.now(),
-    var createdBy: String = "System",
+    var createdBy: String? = "System",
     var updated: LocalDateTime = LocalDateTime.now(),
-    var updatedBy: String = "System"
+    var updatedBy: String? = "System"
 ) {
     @PrePersist
     fun onCreate() {

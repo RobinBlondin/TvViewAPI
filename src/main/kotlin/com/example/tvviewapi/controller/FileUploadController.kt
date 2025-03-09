@@ -38,7 +38,7 @@ class FileUploadController {
 
             Files.copy(file.inputStream, filePath)
 
-            val storedUrl = "/$filePath$fileName"
+            val storedUrl = "http://localhost:8081/slides/$fileName"
             return ResponseEntity.ok().body(storedUrl)
       }
 }

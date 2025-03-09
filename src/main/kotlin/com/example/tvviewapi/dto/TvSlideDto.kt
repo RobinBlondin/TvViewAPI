@@ -4,6 +4,8 @@ import java.util.*
 
 data class TvSlideDto(
     var id: UUID? = null,
-    var url: String = ""
+    var url: String = "",
+    var created: Date? = null,
+    var createdBy: String? = null
 )
 
