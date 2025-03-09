@@ -15,7 +15,7 @@ import kotlin.io.path.exists
 @RequestMapping("/api/files")
 class FileUploadController {
 
-      private val uploadDir = Paths.get("uploads/slides/")
+      private val uploadDir = Paths.get("/uploads/")
 
       init {
             if(!uploadDir.exists()) {
@@ -38,7 +38,7 @@ class FileUploadController {
 
             Files.copy(file.inputStream, filePath)
 
-            val storedUrl = "http://localhost:8081/slides/$fileName"
+            val storedUrl = "http://localhost:8081/uploads/$fileName"
             return ResponseEntity.ok().body(storedUrl)
       }
 }
