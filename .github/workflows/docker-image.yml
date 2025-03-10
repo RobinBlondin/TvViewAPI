@@ -25,4 +25,4 @@ jobs:
       run: docker build . --file Dockerfile -t robinblondin/tvviewapi:latest
 
     - name: Push the Docker image
-      run: docker push -a robinblondin/tvvewapi:latest
+      run: docker push robinblondin/tvvewapi:latest
