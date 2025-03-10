@@ -14,7 +14,15 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: Build with gradle
+      run: ./gradlew bootJar
+
+    - name: Copy the JAR file
+      run: cp build/libs/TvViewAPI-0.0.1-SNAPSHOT.jar app.jar
+
     - name: Build the Docker image
       run: docker build . --file Dockerfile -t robinblondin/tvviewapi:latest
+
     - name: Push the Docker image
       run: docker push -a robinblondin/tvvewapi:latest
