@@ -15,7 +15,7 @@ import kotlin.io.path.exists
 @RequestMapping("/api/files")
 class FileUploadController {
 
-      private val uploadDir = Paths.get("/uploads/")
+      private val uploadDir = Paths.get("uploads")
 
       init {
             if(!uploadDir.exists()) {
@@ -33,7 +33,7 @@ class FileUploadController {
             }
 
             val timestamp = LocalDateTime.now().toString().replace(":", "-")
-            val fileName = "$timestamp-${file.originalFilename}"
+            val fileName = "$timestamp-${file.originalFilename}".replace(" ", "_")
             val filePath = uploadDir.resolve(fileName)
 
             Files.copy(file.inputStream, filePath)
