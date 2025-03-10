@@ -32,3 +32,6 @@ jobs:
 
     - name: Push the Docker image
       run: docker push robinblondin/tvviewapi:latest
+
+    - name: Trigger Render Deploy Hook
+      run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
