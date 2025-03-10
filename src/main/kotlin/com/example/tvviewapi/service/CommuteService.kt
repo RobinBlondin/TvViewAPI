@@ -11,7 +11,8 @@ import kotlinx.serialization.json.*
 @Service
 class CommuteService(
       val jsonParser: Json = Json { ignoreUnknownKeys = true },
-      val dotenv: Dotenv = Dotenv.load()
+      val commuteStopId: String? = System.getenv("COMMUTE_STOP_ID"),
+      val commuteApiKey: String? = System.getenv("COMMUTE_API_KEY")
 ) {
 
       private fun fetchJson(url: String): String {
@@ -23,7 +24,7 @@ class CommuteService(
       }
 
       fun getDepartures(): List<DepartureDto> {
-            val json = fetchJson("https://api.resrobot.se/v2.1/departureBoard?id=${dotenv.get("COMMUTE_STOP_ID")}&format=json&accessId=${dotenv.get("COMMUTE_API_KEY")}")
+            val json = fetchJson("https://api.resrobot.se/v2.1/departureBoard?id=${commuteStopId}&format=json&accessId=${commuteApiKey}")
             return  jsonParser.decodeFromString<DepartureBoard>(json).departures
       }
 

@@ -23,7 +23,6 @@ class GoogleCalendarService {
 
       private val jsonFactory: JsonFactory = GsonFactory.getDefaultInstance()
       private val transport = GoogleNetHttpTransport.newTrustedTransport()
-      private val dotenv = Dotenv.load()
 
       fun getCalendarEvents(): List<CalendarEventDto> {
 
@@ -31,8 +30,7 @@ class GoogleCalendarService {
                   .setApplicationName("TvViewApi")
                   .build()
 
-            val calendarId = dotenv.get("CALENDAR_ID")
-
+            val calendarId = System.getenv("CALENDAR_ID")
             val eventTimeSpan = getWeekStartAndEnd()
 
             val events: Events = service.events().list(calendarId)
@@ -63,7 +61,9 @@ class GoogleCalendarService {
       }
 
       private fun getCredentials(): GoogleCredentials {
-            val credentialsStream: InputStream = this::class.java.getResourceAsStream(dotenv.get("CREDENTIALS"))
+            val credentials = System.getenv("CREDENTIALS")
+
+            val credentialsStream: InputStream = this::class.java.getResourceAsStream(credentials)
                   ?: throw RuntimeException("Could not find credentials")
 
             return GoogleCredentials.fromStream(credentialsStream)
