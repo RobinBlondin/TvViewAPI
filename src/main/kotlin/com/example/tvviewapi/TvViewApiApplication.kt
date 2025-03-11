@@ -8,5 +8,10 @@ import org.springframework.boot.runApplication
 class TvViewApiApplication
 
 fun main(args: Array<String>) {
+      val dotenv = Dotenv.configure().ignoreIfMissing().load()
+
+        dotenv.entries().forEach {
+            System.setProperty(it.key, it.value)
+        }
     runApplication<TvViewApiApplication>(*args)
 }

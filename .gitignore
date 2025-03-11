@@ -42,3 +42,4 @@ out/
 .env
 /src/main/resources/credentials.json
 *.jar
+/uploads/**
