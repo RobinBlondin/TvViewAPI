@@ -25,7 +25,7 @@ class TvReminderController(
 
       @PostMapping("create")
       fun createReminder(@RequestBody dto: TvReminderDto): ResponseEntity<TvReminderDto> {
-            if(dto.id != null || isNotValidDto(dto)) {
+            if(dto.id != null || dto.description.isEmpty()) {
                   return ResponseEntity.badRequest().header("X-Request-ID", "Input data does not meet requirements").build()
             }
 
@@ -37,7 +37,7 @@ class TvReminderController(
 
       @PutMapping("edit")
       fun updateReminder(@RequestBody dto: TvReminderDto): ResponseEntity<TvReminderDto> {
-            if(dto.id == null || isNotValidDto(dto)) {
+            if(dto.id == null || dto.description.isEmpty()) {
                   return ResponseEntity.badRequest().header("X-Request-ID", "Input data does not meet requirements").build()
             }
 
@@ -52,7 +52,5 @@ class TvReminderController(
             }
             return ResponseEntity.ok().body("Input data did not match an existing TvReminder")
       }
-
-      private fun isNotValidDto(dto: TvReminderDto): Boolean = dto.title.isEmpty() || dto.description.isEmpty()
 
  }
