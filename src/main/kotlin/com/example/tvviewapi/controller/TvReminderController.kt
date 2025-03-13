@@ -31,7 +31,7 @@ class TvReminderController(
                   return ResponseEntity.badRequest().header("X-Request-ID", "Input data does not meet requirements").build()
             }
 
-            val updatedDto = TvReminderDto(dto.id, dto.description, LocalDateTime.parse(dto.expiryDate))
+            val updatedDto = TvReminderDto(description = dto.description, expiryDate =  LocalDateTime.parse(dto.expiryDate))
             val saved = reminderService.createReminder(updatedDto)
             webSocketService.sendRefreshSignal()
 
