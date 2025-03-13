@@ -1,11 +1,13 @@
 package com.example.tvviewapi.controller
 
 import com.example.tvviewapi.dto.TvReminderDto
+import com.example.tvviewapi.dto.TvReminderReceiverDto
 import com.example.tvviewapi.service.TvReminderService
 import com.example.tvviewapi.service.WebSocketService
 import lombok.RequiredArgsConstructor
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.time.LocalDateTime
 import java.util.*
 
 @RestController
@@ -24,12 +26,13 @@ class TvReminderController(
                   .orElseGet { ResponseEntity.notFound().header("X-Request-ID", "Input data did not match an existing TvReminder").build() }
 
       @PostMapping("create")
-      fun createReminder(@RequestBody dto: TvReminderDto): ResponseEntity<TvReminderDto> {
+      fun createReminder(@RequestBody dto: TvReminderReceiverDto): ResponseEntity<TvReminderDto> {
             if(dto.id != null || dto.description.isEmpty()) {
                   return ResponseEntity.badRequest().header("X-Request-ID", "Input data does not meet requirements").build()
             }
 
-            val saved = reminderService.createReminder(dto)
+            val updatedDto = TvReminderDto(dto.id, dto.description, LocalDateTime.parse(dto.expiryDate))
+            val saved = reminderService.createReminder(updatedDto)
             webSocketService.sendRefreshSignal()
 
             return ResponseEntity.ok().body(saved)
