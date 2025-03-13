@@ -25,12 +25,13 @@ class TvReminderController(
 
       @PostMapping("create")
       fun createReminder(@RequestBody dto: TvReminderDto): ResponseEntity<TvReminderDto> {
+            println("Reminder caught in backend: $dto")
             if(dto.id != null || dto.description.isEmpty()) {
                   return ResponseEntity.badRequest().header("X-Request-ID", "Input data does not meet requirements").build()
             }
             val saved = reminderService.createReminder(dto)
             webSocketService.sendRefreshSignal()
-
+            println("Reminder after saved in database: $saved")
             return ResponseEntity.ok().body(saved)
       }
 
