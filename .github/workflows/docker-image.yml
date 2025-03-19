@@ -13,14 +13,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set CREDENTIALS_JSON environment variable
+        run: echo "CREDENTIALS_JSON=${{ secrets.CREDENTIALS_JSON }}" >> $GITHUB_ENV
+
       - name: Build with Gradle
         run: ./gradlew bootJar
 
       - name: Copy the JAR file
         run: cp build/libs/TvViewAPI-0.0.1-SNAPSHOT.jar app.jar
-
-      - name: Set CREDENTIALS_JSON environment variable
-        run: echo "CREDENTIALS_JSON=${{ secrets.CREDENTIALS_JSON }}" >> $GITHUB_ENV
 
       - name: Build the Docker image
         run: docker build . --file Dockerfile -t robinblondin/tvviewapi:latest
