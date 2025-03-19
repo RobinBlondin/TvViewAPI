@@ -60,7 +60,7 @@ class GoogleCalendarService {
       }
 
       private fun getCredentials(): GoogleCredentials {
-            val credentials = System.getenv("credentials.json")
+            val credentials = "credentials.json"
 
             val credentialsStream: InputStream = this::class.java.getResourceAsStream(credentials)
                   ?: throw RuntimeException("Could not find credentials")
