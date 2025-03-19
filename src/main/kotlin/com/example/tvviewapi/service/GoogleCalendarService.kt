@@ -10,7 +10,7 @@ import com.google.api.services.calendar.model.Events
 import com.google.auth.http.HttpCredentialsAdapter
 import com.google.auth.oauth2.GoogleCredentials
 import org.springframework.stereotype.Service
-import java.io.InputStream
+import java.io.ByteArrayInputStream
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalTime
@@ -60,14 +60,14 @@ class GoogleCalendarService {
       }
 
       private fun getCredentials(): GoogleCredentials {
-            val credentials = "credentials.json"
+            val credentialsJson = System.getenv("CREDENTIALS_JSON")
+                  ?: throw RuntimeException("CREDENTIALS_JSON environment variable is missing")
 
-            val credentialsStream: InputStream = this::class.java.getResourceAsStream(credentials)
-                  ?: throw RuntimeException("Could not find credentials")
-
+            val credentialsStream = ByteArrayInputStream(credentialsJson.toByteArray(Charsets.UTF_8))
             return GoogleCredentials.fromStream(credentialsStream)
                   .createScoped(listOf("https://www.googleapis.com/auth/calendar.readonly"))
       }
+
 
       private fun getWeekStartAndEnd(): Pair<DateTime, DateTime> {
             val zoneId = ZoneId.systemDefault()
