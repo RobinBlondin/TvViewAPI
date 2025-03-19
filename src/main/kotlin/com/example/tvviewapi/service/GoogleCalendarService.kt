@@ -9,7 +9,6 @@ import com.google.api.services.calendar.Calendar
 import com.google.api.services.calendar.model.Events
 import com.google.auth.http.HttpCredentialsAdapter
 import com.google.auth.oauth2.GoogleCredentials
-import io.github.cdimascio.dotenv.Dotenv
 import org.springframework.stereotype.Service
 import java.io.InputStream
 import java.time.DayOfWeek
