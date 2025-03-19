@@ -5,5 +5,5 @@ import jakarta.persistence.Entity
 @Entity
 class TvReminder(
     var description: String = "",
-    val expiryDate: String = ""
+    var expiryDate: String = ""
 ): BaseEntity()
