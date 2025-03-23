@@ -1,14 +1,11 @@
 package com.example.tvviewapi.service
 
-import org.springframework.messaging.simp.SimpMessagingTemplate
+import com.example.tvviewapi.configuration.CustomWebSocketHandler
 import org.springframework.stereotype.Service
 
 @Service
-class WebSocketService(
-      private val messagingTemplate: SimpMessagingTemplate
-) {
-
-      fun sendRefreshSignal() {
-            messagingTemplate.convertAndSend("/topic/refresh-slides", "refresh")
+class WebSocketService(private val webSocketHandler: CustomWebSocketHandler) {
+      fun sendSignalToAllClients() {
+            webSocketHandler.sendMessageToAll("refresh")
       }
 }
