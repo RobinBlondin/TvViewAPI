@@ -10,11 +10,13 @@ import java.util.concurrent.CopyOnWriteArrayList
 
 @Component
 class CustomWebSocketHandler : TextWebSocketHandler() {
-      private val sessions = CopyOnWriteArrayList<WebSocketSession>()
+      private val sessions = mutableListOf<WebSocketSession>()
 
       override fun afterConnectionEstablished(session: WebSocketSession) {
             println("Connection established with session: $session")
+
             sessions.add(session)
+            println("sessions: ${sessions.size}")
       }
 
       override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
@@ -23,6 +25,7 @@ class CustomWebSocketHandler : TextWebSocketHandler() {
       }
 
       fun sendMessageToAll(message: String) {
+            println("Sending message to all sessions, size: ${sessions.size}")
             for (session in sessions) {
                   println("Sending message to session: $session")
                   try {

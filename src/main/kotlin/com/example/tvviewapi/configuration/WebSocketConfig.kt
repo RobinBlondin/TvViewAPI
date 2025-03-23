@@ -9,14 +9,9 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 
 @Configuration
 @EnableWebSocket
-class WebSocketConfig : WebSocketConfigurer {
+class WebSocketConfig(private val customWebSocketHandler: CustomWebSocketHandler) : WebSocketConfigurer {
 
       override fun registerWebSocketHandlers(registry: WebSocketHandlerRegistry) {
-            registry.addHandler(myWebSocketHandler(), "/ws").setAllowedOrigins("*")
-      }
-
-      @Bean
-      fun myWebSocketHandler(): WebSocketHandler {
-            return CustomWebSocketHandler()
+            registry.addHandler(customWebSocketHandler, "/ws").setAllowedOrigins("*")
       }
 }
