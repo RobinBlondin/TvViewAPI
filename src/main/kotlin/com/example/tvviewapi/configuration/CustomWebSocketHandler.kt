@@ -13,10 +13,12 @@ class CustomWebSocketHandler : TextWebSocketHandler() {
       private val sessions = CopyOnWriteArrayList<WebSocketSession>()
 
       override fun afterConnectionEstablished(session: WebSocketSession) {
+            println("Connection established with session: $session")
             sessions.add(session)
       }
 
       override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
+            println("Connection closed with session: $session")
             sessions.remove(session)
       }
 
