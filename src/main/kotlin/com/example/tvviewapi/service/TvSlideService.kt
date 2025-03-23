@@ -4,6 +4,7 @@ import com.example.tvviewapi.dto.TvSlideDto
 import com.example.tvviewapi.mapper.TvSlideMapper
 import com.example.tvviewapi.repository.TVSlideRepository
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
@@ -28,6 +29,7 @@ class TvSlideService(
             return Optional.of(tvSlideMapper.toDto(entity))
       }
 
+      @Transactional
       fun deleteSlideById(id: UUID): Boolean {
             if (repo.existsById(id)) {
                   deleteFile(id)
@@ -56,13 +58,11 @@ class TvSlideService(
 
             try {
                   Files.delete(filePath)
+                  return true
             } catch (e: Exception) {
                   println("Error deleting file: ${e.message}")
                   return false
             }
-
-            Files.delete(filePath)
-            return true
       }
 
       private fun getFileNameFromUrl(url: String): String {
