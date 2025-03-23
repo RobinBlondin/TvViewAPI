@@ -26,10 +26,10 @@ class SecurityConfig(
       fun securityFilterChain(http: HttpSecurity): SecurityFilterChain =
             http
                   .cors { cors -> cors.configurationSource(corsConfigurationSource()) }
-                  .csrf { csrf -> csrf.ignoringRequestMatchers("/auth/google", "/ws") }
+                  .csrf { csrf -> csrf.ignoringRequestMatchers("/auth/google", "/ws/**") }
                   .authorizeHttpRequests { auth ->
                         auth
-                              .requestMatchers("/auth/google", "/uploads/**", "/ws").permitAll()
+                              .requestMatchers("/auth/google", "/uploads/**", "/ws/**").permitAll()
                               .anyRequest().authenticated()
                   }
                   .oauth2ResourceServer { oauth2 ->
