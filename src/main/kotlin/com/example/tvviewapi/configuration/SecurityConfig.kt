@@ -29,7 +29,7 @@ class SecurityConfig(
                   .csrf { csrf -> csrf.ignoringRequestMatchers("/auth/google") }
                   .authorizeHttpRequests { auth ->
                         auth
-                              .requestMatchers("/auth/google", "/uploads/**").permitAll()
+                              .requestMatchers("/auth/google", "/uploads/**", "/ws").permitAll()
                               .anyRequest().authenticated()
                   }
                   .oauth2ResourceServer { oauth2 ->
