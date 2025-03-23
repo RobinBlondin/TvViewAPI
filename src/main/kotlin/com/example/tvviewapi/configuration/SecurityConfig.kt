@@ -26,7 +26,7 @@ class SecurityConfig(
       fun securityFilterChain(http: HttpSecurity): SecurityFilterChain =
             http
                   .cors { cors -> cors.configurationSource(corsConfigurationSource()) }
-                  .csrf { csrf -> csrf.ignoringRequestMatchers("/auth/google") }
+                  .csrf { csrf -> csrf.ignoringRequestMatchers("/auth/google", "/ws") }
                   .authorizeHttpRequests { auth ->
                         auth
                               .requestMatchers("/auth/google", "/uploads/**", "/ws").permitAll()
@@ -65,7 +65,7 @@ class SecurityConfig(
             configuration.allowedHeaders = listOf("*")
             configuration.allowCredentials = true
 
-            val source: UrlBasedCorsConfigurationSource = UrlBasedCorsConfigurationSource()
+            val source = UrlBasedCorsConfigurationSource()
             source.registerCorsConfiguration("/**", configuration)
             return source
       }
