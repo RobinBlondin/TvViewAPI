@@ -29,7 +29,7 @@ class TvReminderController(
                   return ResponseEntity.badRequest().header("X-Request-ID", "Input data does not meet requirements").build()
             }
             val saved = reminderService.createReminder(dto)
-            webSocketService.sendRefreshSignal()
+            webSocketService.sendSignalToAllClients()
 
             return ResponseEntity.ok().body(saved)
       }
@@ -40,6 +40,7 @@ class TvReminderController(
                   return ResponseEntity.badRequest().header("X-Request-ID", "Input data does not meet requirements").build()
             }
 
+            webSocketService.sendSignalToAllClients()
             return reminderService.updateReminder(dto).map { reminder -> ResponseEntity.ok().body(reminder) }
                   .orElseGet { ResponseEntity.notFound().header("X-Request-ID", "Input data did not match an existing TvReminder").build() }
       }
@@ -47,6 +48,7 @@ class TvReminderController(
       @DeleteMapping("delete/{id}")
       fun deleteReminderById(@PathVariable id: UUID): ResponseEntity<String> {
             if(reminderService.deleteReminderById(id)) {
+                  webSocketService.sendSignalToAllClients()
                   return ResponseEntity.ok().body("Reminder deleted successfully")
             }
             return ResponseEntity.ok().body("Input data did not match an existing TvReminder")
