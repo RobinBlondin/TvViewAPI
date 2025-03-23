@@ -22,8 +22,10 @@ class CustomWebSocketHandler : TextWebSocketHandler() {
 
       fun sendMessageToAll(message: String) {
             for (session in sessions) {
+                  println("Sending message to session: $session")
                   try {
                         if (session.isOpen) {
+                              println("Session is open")
                               session.sendMessage(TextMessage(message))
                         }
                   } catch (e: IOException) {
