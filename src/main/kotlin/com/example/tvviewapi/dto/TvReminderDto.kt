@@ -5,5 +5,5 @@ import java.util.*
 data class TvReminderDto(
     var id: UUID? = null,
     var description: String = "",
-    var expiryDate: String = ""
+    var done: Boolean = false
     )

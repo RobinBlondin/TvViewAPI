@@ -54,4 +54,11 @@ class TvReminderController(
             return ResponseEntity.ok().body("Input data did not match an existing TvReminder")
       }
 
+      @DeleteMapping("delete/done")
+      fun deleteCheckedReminders(): ResponseEntity<String> {
+            reminderService.deleteCheckedReminders()
+            webSocketService.sendSignalToAllClients()
+            return ResponseEntity.ok().body("Checked reminders deleted successfully")
+      }
+
  }

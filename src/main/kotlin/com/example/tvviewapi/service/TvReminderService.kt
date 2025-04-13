@@ -34,4 +34,9 @@ class TvReminderService(
             }
             return false
       }
+
+      fun deleteCheckedReminders() {
+            val finishedReminders = repo.findAll().filter { it.done }
+            finishedReminders.forEach { repo.delete(it) }
+      }
 }
