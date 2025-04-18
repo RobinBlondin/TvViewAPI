@@ -3,13 +3,15 @@ package com.example.tvviewapi.service
 import com.example.tvviewapi.dto.TvReminderDto
 import com.example.tvviewapi.mapper.TvReminderMapper
 import com.example.tvviewapi.repository.TvReminderRepository
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
 class TvReminderService(
       val repo: TvReminderRepository,
-      val tvReminderMapper: TvReminderMapper
+      val tvReminderMapper: TvReminderMapper,
+      val webSocketService: WebSocketService
 ) {
       fun getAllReminders(): List<TvReminderDto> = repo.findAll().map { tvReminderMapper.toDto(it) }
 
@@ -35,8 +37,10 @@ class TvReminderService(
             return false
       }
 
+      @Scheduled(cron = "0 0 0 * * ?")
       fun deleteCheckedReminders() {
             val finishedReminders = repo.findAll().filter { it.done }
             finishedReminders.forEach { repo.delete(it) }
+            webSocketService.sendSignalToAllClients()
       }
 }
