@@ -15,9 +15,6 @@ class CommuteService(
 
       fun getDepartures(): List<DepartureDto> {
             val json = jsonService.fetch("https://api.resrobot.se/v2.1/departureBoard?id=${commuteStopId}&format=json&accessId=${commuteApiKey}")
-            println(json)
-            println(commuteStopId)
-            println(commuteApiKey)
             return  jsonService.parse<DepartureBoard>(json).departures
       }
 
