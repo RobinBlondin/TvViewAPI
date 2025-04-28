@@ -1,6 +1,5 @@
 package com.example.tvviewapi.service
 
-import com.example.tvviewapi.dto.HighwayBridgeOpenings
 import com.example.tvviewapi.dto.PlannedOpeningDto
 import org.springframework.stereotype.Service
 

@@ -6,7 +6,6 @@ import org.springframework.web.socket.TextMessage
 import org.springframework.web.socket.WebSocketSession
 import org.springframework.web.socket.handler.TextWebSocketHandler
 import java.io.IOException
-import java.util.concurrent.CopyOnWriteArrayList
 
 @Component
 class CustomWebSocketHandler : TextWebSocketHandler() {
