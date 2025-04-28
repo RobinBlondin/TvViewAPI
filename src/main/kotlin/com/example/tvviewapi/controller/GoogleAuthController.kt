@@ -1,21 +1,31 @@
 package com.example.tvviewapi.controller
 
+import com.example.tvviewapi.dto.GoogleAuthRequestDto
 import com.example.tvviewapi.service.UserService
+import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.security.Keys
 import org.springframework.http.*
 import org.springframework.util.LinkedMultiValueMap
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.client.RestTemplate
-import org.springframework.web.bind.annotation.*
+import java.nio.charset.StandardCharsets
+import java.util.*
+
 
 @RestController
 @RequestMapping("/auth")
 class GoogleAuthController(private val userService: UserService) {
+      val secretKey: String? = System.getenv("JWT_SECRET")
 
       @PostMapping("/google")
-      fun exchangeAuthCode(@RequestBody request: Map<String, String>): ResponseEntity<Map<String, Any>> {
-            val authCode = request["code"] ?: return ResponseEntity.badRequest().body(mapOf("error" to "Authorization code is required"))
-            val clientId = request["clientId"] ?: return ResponseEntity.badRequest().body(mapOf("error" to "Client ID is required"))
-            val clientSecret = request["clientSecret"] ?: return ResponseEntity.badRequest().body(mapOf("error" to "Client Secret is required"))
-            val redirectUri = request["redirectUri"] ?: return ResponseEntity.badRequest().body(mapOf("error" to "Redirect URI is required"))
+      fun exchangeAuthCode(@RequestBody request: GoogleAuthRequestDto): ResponseEntity<Map<String, Any>> {
+            val authCode = request.code
+            val clientId = request.clientId
+            val clientSecret = request.clientSecret
+            val redirectUri = request.redirectUri
 
             val restTemplate = RestTemplate()
 
@@ -41,7 +51,8 @@ class GoogleAuthController(private val userService: UserService) {
             )
 
             if (!tokenResponse.statusCode.is2xxSuccessful) {
-                  return ResponseEntity.status(tokenResponse.statusCode).body(mapOf("error" to "Failed to get access token"))
+                  return ResponseEntity.status(tokenResponse.statusCode)
+                        .body(mapOf("error" to "Failed to get access token"))
             }
 
             val accessToken = tokenResponse.body?.get("access_token") as? String
@@ -64,12 +75,14 @@ class GoogleAuthController(private val userService: UserService) {
             )
 
             if (!userInfoResponse.statusCode.is2xxSuccessful) {
-                  return ResponseEntity.status(userInfoResponse.statusCode).body(mapOf("error" to "Failed to fetch user info"))
+                  return ResponseEntity.status(userInfoResponse.statusCode)
+                        .body(mapOf("error" to "Failed to fetch user info"))
             }
 
             val userInfo = userInfoResponse.body!!
             println(userInfo)
-            val email = userInfo["email"] as? String ?: return ResponseEntity.badRequest().body(mapOf("error" to "No email found"))
+            val email = userInfo["email"] as? String ?: return ResponseEntity.badRequest()
+                  .body(mapOf("error" to "No email found"))
             val name = userInfo["name"] as? String ?: "Unknown"
             val picture = userInfo["picture"] as? String ?: ""
 
@@ -78,14 +91,28 @@ class GoogleAuthController(private val userService: UserService) {
                   return ResponseEntity.status(403).body(mapOf("error" to "Unauthorized user"))
             }
 
-            // Step 4: Return user info and access token if valid
+            val isTvViewRequest = request.isTvView
+
+            val secret = "this-is-a-very-long-random-secret-key-for-hs512-testing-1234567890"
+            val secretKey =
+                  Keys.hmacShaKeyFor(secret.toByteArray(StandardCharsets.UTF_8))
+
+            val tvToken = Jwts.builder()
+                  .subject(email)
+                  .issuedAt(Date())
+                  .expiration(Date(System.currentTimeMillis() + 90L * 24 * 60 * 60 * 1000))
+                  .claim("is_tv_token", true)
+                  .signWith(secretKey, Jwts.SIG.HS512)
+                  .compact()
+
             return ResponseEntity.ok(
                   mapOf(
                         "access_token" to accessToken,
                         "id_token" to idToken,
                         "email" to email,
                         "name" to name,
-                        "picture" to picture
+                        "picture" to picture,
+                        "tv_token" to if (isTvViewRequest) tvToken else "",
                   )
             )
       }
