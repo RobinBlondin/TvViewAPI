@@ -9,6 +9,7 @@ import com.google.api.services.calendar.Calendar
 import com.google.api.services.calendar.model.Events
 import com.google.auth.http.HttpCredentialsAdapter
 import com.google.auth.oauth2.GoogleCredentials
+import io.github.cdimascio.dotenv.Dotenv
 import org.springframework.stereotype.Service
 import java.io.ByteArrayInputStream
 import java.time.DayOfWeek
@@ -22,6 +23,7 @@ class GoogleCalendarService {
 
       private val jsonFactory: JsonFactory = GsonFactory.getDefaultInstance()
       private val transport = GoogleNetHttpTransport.newTrustedTransport()
+      val dotenv: Dotenv? = Dotenv.configure().ignoreIfMissing().load()
 
       fun getCalendarEvents(): List<CalendarEventDto> {
 
@@ -29,7 +31,9 @@ class GoogleCalendarService {
                   .setApplicationName("TvViewApi")
                   .build()
 
-            val calendarId = System.getenv("CALENDAR_ID")
+            val calendarId = dotenv?.get("CALENDAR_ID")
+                  ?: throw RuntimeException("CALENDAR_ID environment variable is missing")
+
             val eventTimeSpan = getWeekStartAndEnd()
 
             val events: Events = service.events().list(calendarId)
@@ -60,8 +64,9 @@ class GoogleCalendarService {
       }
 
       private fun getCredentials(): GoogleCredentials {
-            val credentialsJson = System.getenv("CREDENTIALS_JSON")
+            val credentialsJson = dotenv?.get("CREDENTIALS_JSON")
                   ?: throw RuntimeException("CREDENTIALS_JSON environment variable is missing")
+
 
             val credentialsStream = ByteArrayInputStream(credentialsJson.toByteArray(Charsets.UTF_8))
             return GoogleCredentials.fromStream(credentialsStream)
