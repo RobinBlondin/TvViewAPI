@@ -2,6 +2,7 @@ package com.example.tvviewapi.controller
 
 import com.example.tvviewapi.dto.GoogleAuthRequestDto
 import com.example.tvviewapi.service.UserService
+import io.github.cdimascio.dotenv.Dotenv
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
 import org.springframework.http.*
@@ -18,7 +19,8 @@ import java.util.*
 @RestController
 @RequestMapping("/auth")
 class GoogleAuthController(private val userService: UserService) {
-      val secretKey: String? = System.getenv("JWT_SECRET")
+      val dotenv: Dotenv? = Dotenv.configure().ignoreIfMissing().load()
+      val secret: String? = dotenv?.get("JWT_SECRET")
 
       @PostMapping("/google")
       fun exchangeAuthCode(@RequestBody request: GoogleAuthRequestDto): ResponseEntity<Map<String, Any>> {
@@ -64,9 +66,7 @@ class GoogleAuthController(private val userService: UserService) {
             // Step 2: Use access token to get user info
             val userInfoHeaders = HttpHeaders()
             userInfoHeaders.setBearerAuth(accessToken)
-
             val userInfoRequestEntity = HttpEntity<Void>(userInfoHeaders)
-
             val userInfoResponse = restTemplate.exchange(
                   "https://www.googleapis.com/oauth2/v2/userinfo",
                   HttpMethod.GET,
@@ -80,7 +80,6 @@ class GoogleAuthController(private val userService: UserService) {
             }
 
             val userInfo = userInfoResponse.body!!
-            println(userInfo)
             val email = userInfo["email"] as? String ?: return ResponseEntity.badRequest()
                   .body(mapOf("error" to "No email found"))
             val name = userInfo["name"] as? String ?: "Unknown"
@@ -92,18 +91,14 @@ class GoogleAuthController(private val userService: UserService) {
             }
 
             val isTvViewRequest = request.isTvView
-
-            val secret = "this-is-a-very-long-random-secret-key-for-hs512-testing-1234567890"
-            val secretKey =
-                  Keys.hmacShaKeyFor(secret.toByteArray(StandardCharsets.UTF_8))
-
-            val tvToken = Jwts.builder()
+            val secretKey = Keys.hmacShaKeyFor(secret?.toByteArray(StandardCharsets.UTF_8))
+            val tvToken = if (isTvViewRequest) Jwts.builder()
                   .subject(email)
                   .issuedAt(Date())
                   .expiration(Date(System.currentTimeMillis() + 90L * 24 * 60 * 60 * 1000))
                   .claim("is_tv_token", true)
                   .signWith(secretKey, Jwts.SIG.HS512)
-                  .compact()
+                  .compact() else ""
 
             return ResponseEntity.ok(
                   mapOf(
@@ -112,7 +107,7 @@ class GoogleAuthController(private val userService: UserService) {
                         "email" to email,
                         "name" to name,
                         "picture" to picture,
-                        "tv_token" to if (isTvViewRequest) tvToken else "",
+                        "tv_token" to tvToken,
                   )
             )
       }
