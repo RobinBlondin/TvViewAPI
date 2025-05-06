@@ -37,8 +37,9 @@ class TvReminderService(
             return false
       }
 
-      @Scheduled(cron = "0 32 12 * * ?")
+      @Scheduled(cron = "0 42 13 * * ?", zone = "Europe/Stockholm")
       fun deleteCheckedReminders() {
+            println("Deleting checked reminders")
             val finishedReminders = repo.findAll().filter { it.done }
             finishedReminders.forEach { repo.delete(it) }
             webSocketService.sendSignalToAllClients()
