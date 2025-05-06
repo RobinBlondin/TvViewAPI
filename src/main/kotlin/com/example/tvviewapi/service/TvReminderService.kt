@@ -37,7 +37,7 @@ class TvReminderService(
             return false
       }
 
-      @Scheduled(cron = "0 0 0 * * ?")
+      @Scheduled(cron = "0 25 13 * * ?")
       fun deleteCheckedReminders() {
             val finishedReminders = repo.findAll().filter { it.done }
             finishedReminders.forEach { repo.delete(it) }
