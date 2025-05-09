@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service
 import java.io.ByteArrayInputStream
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.time.LocalTime
 import java.time.ZoneId
 import java.time.temporal.TemporalAdjusters
 
@@ -77,14 +76,14 @@ class GoogleCalendarService {
       private fun getWeekStartAndEnd(): Pair<DateTime, DateTime> {
             val zoneId = ZoneId.systemDefault()
             val today = LocalDate.now()
-            val startOfWeek = today.with(TemporalAdjusters.previous(DayOfWeek.SUNDAY))
-                  .atTime(LocalTime.MIN).atZone(zoneId)
-            val endOfWeek = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY))
-                  .atTime(LocalTime.MAX).atZone(zoneId)
+
+            val startOfWeek = today.with(TemporalAdjusters.previous(DayOfWeek.SUNDAY)).atStartOfDay(zoneId)
+            val endOfWeek = startOfWeek.plusDays(6).withHour(23).withMinute(59).withSecond(59).withNano(999_999_999)
 
             val startDateTime = DateTime(startOfWeek.toInstant().toEpochMilli())
             val endDateTime = DateTime(endOfWeek.toInstant().toEpochMilli())
 
             return Pair(startDateTime, endDateTime)
       }
+
 }
