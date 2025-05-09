@@ -1,6 +1,7 @@
 package com.example.tvviewapi.controller
 
 import com.example.tvviewapi.dto.TvReminderDto
+import com.example.tvviewapi.enums.SocketMessage
 import com.example.tvviewapi.service.TvReminderService
 import com.example.tvviewapi.service.WebSocketService
 import lombok.RequiredArgsConstructor
@@ -29,7 +30,7 @@ class TvReminderController(
                   return ResponseEntity.badRequest().header("X-Request-ID", "Input data does not meet requirements").build()
             }
             val saved = reminderService.createReminder(dto)
-            webSocketService.sendSignalToAllClients()
+            webSocketService.sendSignalToAllClients(SocketMessage.REMINDER)
 
             return ResponseEntity.ok().body(saved)
       }
@@ -40,7 +41,7 @@ class TvReminderController(
                   return ResponseEntity.badRequest().header("X-Request-ID", "Input data does not meet requirements").build()
             }
 
-            webSocketService.sendSignalToAllClients()
+            webSocketService.sendSignalToAllClients(SocketMessage.REMINDER)
             return reminderService.updateReminder(dto).map { reminder -> ResponseEntity.ok().body(reminder) }
                   .orElseGet { ResponseEntity.notFound().header("X-Request-ID", "Input data did not match an existing TvReminder").build() }
       }
@@ -48,7 +49,7 @@ class TvReminderController(
       @DeleteMapping("delete/{id}")
       fun deleteReminderById(@PathVariable id: UUID): ResponseEntity<String> {
             if(reminderService.deleteReminderById(id)) {
-                  webSocketService.sendSignalToAllClients()
+                  webSocketService.sendSignalToAllClients(SocketMessage.REMINDER)
                   return ResponseEntity.ok().body("Reminder deleted successfully")
             }
             return ResponseEntity.ok().body("Input data did not match an existing TvReminder")
@@ -57,7 +58,7 @@ class TvReminderController(
       @DeleteMapping("delete/done")
       fun deleteCheckedReminders(): ResponseEntity<String> {
             reminderService.deleteCheckedReminders()
-            webSocketService.sendSignalToAllClients()
+            webSocketService.sendSignalToAllClients(SocketMessage.REMINDER)
             return ResponseEntity.ok().body("Checked reminders deleted successfully")
       }
 

@@ -2,6 +2,7 @@ package com.example.tvviewapi.controller
 
 import com.example.tvviewapi.service.WebSocketService
 import com.example.tvviewapi.dto.TvSlideDto
+import com.example.tvviewapi.enums.SocketMessage
 import com.example.tvviewapi.service.TvSlideService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -32,7 +33,7 @@ class TvSlideController(
             val saved = tvSlideService.createSlide(dto)
 
             if(saved.isPresent) {
-                  webSocketService.sendSignalToAllClients()
+                  webSocketService.sendSignalToAllClients(SocketMessage.SLIDE)
                   return ResponseEntity.ok().body(saved.get())
             }
             return ResponseEntity.status(HttpStatus.CONFLICT).header("X-Request-ID", "TvSlide already exists in database").build()
@@ -41,7 +42,7 @@ class TvSlideController(
       @DeleteMapping("delete/{id}")
       fun deleteSlideById(@PathVariable id: UUID) : ResponseEntity<String> {
             if(tvSlideService.deleteSlideById(id)) {
-                  webSocketService.sendSignalToAllClients()
+                  webSocketService.sendSignalToAllClients(SocketMessage.SLIDE)
                   return ResponseEntity.ok().body("TvSlide deleted successfully")
             }
 
@@ -54,7 +55,7 @@ class TvSlideController(
                   return ResponseEntity.badRequest().header("X-Request-ID", "Input data does not meet requirements").build()
             }
 
-            webSocketService.sendSignalToAllClients()
+            webSocketService.sendSignalToAllClients(SocketMessage.SLIDE)
             return tvSlideService.updateSlide(dto).map { slide -> ResponseEntity.ok().body(slide) }
                   .orElseGet { ResponseEntity.notFound().header("X-Request-ID", "Input data did not match an existing TvSlide").build() }
       }

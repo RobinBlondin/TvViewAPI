@@ -1,6 +1,7 @@
 package com.example.tvviewapi.service
 
 import com.example.tvviewapi.dto.TvReminderDto
+import com.example.tvviewapi.enums.SocketMessage
 import com.example.tvviewapi.mapper.TvReminderMapper
 import com.example.tvviewapi.repository.TvReminderRepository
 import org.springframework.scheduling.annotation.Scheduled
@@ -41,6 +42,6 @@ class TvReminderService(
       fun deleteCheckedReminders() {
             val finishedReminders = repo.findAll().filter { it.done }
             finishedReminders.forEach { repo.delete(it) }
-            webSocketService.sendSignalToAllClients()
+            webSocketService.sendSignalToAllClients(SocketMessage.REMINDER)
       }
 }
