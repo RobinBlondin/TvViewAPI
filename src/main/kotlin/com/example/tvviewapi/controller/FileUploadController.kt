@@ -1,5 +1,6 @@
 package com.example.tvviewapi.controller
 
+import io.github.cdimascio.dotenv.Dotenv
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -16,6 +17,7 @@ import kotlin.io.path.exists
 class FileUploadController {
 
       private val uploadDir = Paths.get("uploads")
+      private val dotenv: Dotenv? = Dotenv.configure().ignoreIfMissing().load()
 
       init {
             if(!uploadDir.exists()) {
@@ -38,7 +40,7 @@ class FileUploadController {
 
             Files.copy(file.inputStream, filePath)
 
-            val storedUrl = "http://localhost:8081/uploads/$fileName"
+            val storedUrl =  dotenv?.get("FILE_UPLOAD_DIR")  + "/$fileName"
             return ResponseEntity.ok().body(storedUrl)
       }
 }
