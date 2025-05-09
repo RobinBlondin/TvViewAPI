@@ -77,8 +77,8 @@ class GoogleCalendarService {
       private fun getWeekStartAndEnd(): Pair<DateTime, DateTime> {
             val zoneId = ZoneId.systemDefault()
             val today = LocalDate.now()
-            val startOfWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY)).atStartOfDay(zoneId)
-
+            val startOfWeek = today.with(TemporalAdjusters.previous(DayOfWeek.SUNDAY))
+                  .atTime(LocalTime.MIN).atZone(zoneId)
             val endOfWeek = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY))
                   .atTime(LocalTime.MAX).atZone(zoneId)
 
