@@ -38,7 +38,7 @@ class GoogleCalendarService {
             val events: Events = service.events().list(calendarId)
                   .setTimeMin(eventTimeSpan.first)
                   .setTimeMax(eventTimeSpan.second)
-                  .setMaxResults(10)
+                  .setMaxResults(30)
                   .setOrderBy("startTime")
                   .setSingleEvents(true)
                   .execute()
