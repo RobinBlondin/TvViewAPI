@@ -58,6 +58,9 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("com.h2database:h2:2.3.232")
+    testImplementation("io.mockk:mockk:1.14.2")
+    testImplementation("com.ninja-squad:springmockk:4.0.2")
+
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
