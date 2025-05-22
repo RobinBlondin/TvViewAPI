@@ -1,6 +1,9 @@
 # TV View API
 
-A Kotlin Spring Boot backend project for displaying calendar events, uploading files, tracking public transportation departures, and more.
+A Kotlin Spring Boot backend for displaying calendar events, uploading files, tracking public transportation departures, and more.
+This project serves as the backend for the companion frontend, TvViewWeb: https://github.com/RobinBlondin/TvViewWeb.
+
+It functions as an OAuth2 Resource Server, handling authenticated requests from the frontend and integrating various third-party services into a unified API.
 
 ## Technologies Used
 
@@ -100,7 +103,7 @@ VALUES(gen_random_uuid(), now(), 'your_name', now() , 'your_name', 'your_name', 
 ```
 
 
-## 🐳 Using Docker for PostgreSQL (Optional)
+## Using Docker for PostgreSQL (Optional)
 
 If you don’t have PostgreSQL installed, you can spin up a container:
 
