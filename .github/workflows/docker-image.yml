@@ -36,6 +36,6 @@ jobs:
         run: rm -f credentials.json
 
       - name: Trigger VPS deploy hook
-        run: curl -X POST \ 
-          https://tvview.wassblondin.se/deploy -H  \
-          "Authorization: Bearer ${{ secrets.VPS_WEBHOOK_TOKEN }}"
+        run: |
+          curl -X POST https://tvview.wassblondin.se/deploy \
+            -H "Authorization: Bearer ${{ secrets.VPS_WEBHOOK_TOKEN }}"
