@@ -34,3 +34,7 @@ jobs:
 
       - name: Remove credentials.json
         run: rm -f credentials.json
+
+      - name: Trigger VPS deploy hook
+        run: curl -X POST https://tvview.wassblondin.se:8000/deploy -H  \
+          "Authorization: Bearer ${{ secrets.VPS_WEBHOOK_TOKEN }}"
