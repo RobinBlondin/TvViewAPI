@@ -12,7 +12,7 @@ class User (
         var email: String = "",
         var displayName: String = "",
         var enabled: Boolean = true,
-        var refreshToken: String = "",
+        var refreshToken: String? = null,
 ): BaseEntity(), UserDetails {
     override fun getUsername(): String = email
 

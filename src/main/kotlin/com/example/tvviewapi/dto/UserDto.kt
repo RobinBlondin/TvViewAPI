@@ -6,5 +6,5 @@ data class UserDto(
     var id: UUID? = null,
     var email: String = "",
     var displayName: String = "",
-    var refreshToken: String = ""
+    var refreshToken: String? = null
 )

@@ -16,7 +16,7 @@ class UserService(
 
     fun isRegisteredUser(email: String): Boolean = repo.existsByEmail(email)
 
-    fun findUserByEmail(email: String  = "robin.blondin@gmail.com"): Optional<UserDto> = repo.getUserByEmail(email).map { userMapper.toDto(it) }
+    fun findUserByEmail(email: String): Optional<UserDto> = repo.getUserByEmail(email).map { userMapper.toDto(it) }
 
     fun createUser(dto: UserDto): Optional<UserDto> {
         if(repo.existsByEmail(dto.email) || (dto.id != null && repo.existsById(dto.id!!))) {
