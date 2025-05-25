@@ -7,7 +7,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 
 @Entity
-@Data
 @Table(name = "_user")
 class User (
         var email: String = "",
