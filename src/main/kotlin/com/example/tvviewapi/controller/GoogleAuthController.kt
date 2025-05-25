@@ -95,7 +95,7 @@ class GoogleAuthController(
             if (!userService.isRegisteredUser(email)) {
                   return ResponseEntity.status(403).body(mapOf("error" to "Unauthorized user"))
             }
-
+            println("Email: $email")
             val user = userService.findUserByEmail(email)
                   .orElseThrow { RuntimeException("User not found: $email") }
 
