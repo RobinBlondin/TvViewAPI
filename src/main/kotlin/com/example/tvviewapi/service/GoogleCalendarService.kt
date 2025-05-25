@@ -157,7 +157,12 @@ class GoogleCalendarService(
             val zoneId = ZoneId.systemDefault()
             val today = LocalDate.now()
 
-            val startOfWeek = today.with(TemporalAdjusters.previous(DayOfWeek.SUNDAY)).atStartOfDay(zoneId)
+            val startOfWeek =
+                  if ( today.dayOfWeek == DayOfWeek.SUNDAY )
+                        today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY)).atStartOfDay(zoneId)
+                  else
+                        today.with(TemporalAdjusters.previous(DayOfWeek.SUNDAY)).atStartOfDay(zoneId)
+
             val endOfWeek = startOfWeek.plusDays(6).withHour(23).withMinute(59).withSecond(59).withNano(999_999_999)
 
             val startDateTime = DateTime(startOfWeek.toInstant().toEpochMilli())
