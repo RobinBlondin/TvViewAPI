@@ -74,7 +74,8 @@ class GoogleCalendarService(
       }
 
       @Scheduled(cron = "0 0 1 * * ?", zone = "Europe/Stockholm")
-      fun refreshCalendarWatch(email: String = "robin.blondin@gmail.com") {
+      fun refreshCalendarWatch() {
+            val email = "robin.blondin@gmail.com"
             val newAccessToken = refreshAccessToken(email) ?: run {
                   println(" Failed to refresh access token for $email")
                   return
