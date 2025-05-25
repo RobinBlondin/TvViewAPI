@@ -94,6 +94,8 @@ class GoogleCalendarService(
                   "params" to mapOf("ttl" to "86400")
             )
 
+            println("Starting watch for calendar: $calendarId with access token: $accessToken")
+
             WebClient.create()
                   .post()
                   .uri(watchUrl)
