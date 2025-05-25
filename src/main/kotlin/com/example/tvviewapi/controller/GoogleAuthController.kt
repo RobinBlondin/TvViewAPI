@@ -100,7 +100,7 @@ class GoogleAuthController(
                   .orElseThrow { RuntimeException("User not found: $email") }
 
             println("Refresh Token: $refreshToken")
-            if(user.refreshToken.isEmpty() || user.refreshToken.isBlank()) {
+            if(user.refreshToken != null && (user.refreshToken!!.isEmpty() || user.refreshToken!!.isBlank())) {
                   user.refreshToken = refreshToken ?: ""
                   userService.updateUser(user)
             }
