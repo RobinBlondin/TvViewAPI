@@ -101,6 +101,7 @@ class GoogleAuthController(
 
             if(user.refreshToken.isEmpty() || user.refreshToken.isBlank()) {
                   user.refreshToken = refreshToken ?: ""
+                  userService.updateUser(user)
             }
 
             val isTvViewRequest = request.isTvView
