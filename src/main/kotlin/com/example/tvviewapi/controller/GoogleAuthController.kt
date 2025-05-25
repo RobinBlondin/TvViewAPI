@@ -1,6 +1,7 @@
 package com.example.tvviewapi.controller
 
 import com.example.tvviewapi.dto.GoogleAuthRequestDto
+import com.example.tvviewapi.service.GoogleCalendarService
 import com.example.tvviewapi.service.UserService
 import io.github.cdimascio.dotenv.Dotenv
 import io.jsonwebtoken.Jwts
@@ -18,7 +19,10 @@ import java.util.*
 
 @RestController
 @RequestMapping("/auth")
-class GoogleAuthController(private val userService: UserService) {
+class GoogleAuthController(
+      private val userService: UserService,
+      private val googleCalendarService: GoogleCalendarService
+) {
       val dotenv: Dotenv? = Dotenv.configure().ignoreIfMissing().load()
       val secret: String? = dotenv?.get("JWT_SECRET")
 
@@ -60,6 +64,8 @@ class GoogleAuthController(private val userService: UserService) {
             val accessToken = tokenResponse.body?.get("access_token") as? String
                   ?: return ResponseEntity.badRequest().body(mapOf("error" to "Invalid token response"))
 
+            val refreshToken = tokenResponse.body?.get("refresh_token") as? String
+
             val idToken = tokenResponse.body?.get("id_token") as? String
                   ?: return ResponseEntity.badRequest().body(mapOf("error" to "Invalid token response"))
 
@@ -90,6 +96,13 @@ class GoogleAuthController(private val userService: UserService) {
                   return ResponseEntity.status(403).body(mapOf("error" to "Unauthorized user"))
             }
 
+            val user = userService.findUserByEmail(email)
+                  .orElseThrow { RuntimeException("User not found: $email") }
+
+            if(user.refreshToken.isEmpty() || user.refreshToken.isBlank()) {
+                  user.refreshToken = refreshToken ?: ""
+            }
+
             val isTvViewRequest = request.isTvView
             val secretKey = Keys.hmacShaKeyFor(secret?.toByteArray(StandardCharsets.UTF_8))
             val tvToken = if (isTvViewRequest) Jwts.builder()
@@ -99,6 +112,8 @@ class GoogleAuthController(private val userService: UserService) {
                   .claim("is_tv_token", true)
                   .signWith(secretKey, Jwts.SIG.HS512)
                   .compact() else ""
+
+            googleCalendarService.startWatchingCalendar(accessToken)
 
             return ResponseEntity.ok(
                   mapOf(

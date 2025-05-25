@@ -10,15 +10,26 @@ import com.google.api.services.calendar.model.Events
 import com.google.auth.http.HttpCredentialsAdapter
 import com.google.auth.oauth2.GoogleCredentials
 import io.github.cdimascio.dotenv.Dotenv
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
+import org.springframework.http.MediaType
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
+import org.springframework.util.LinkedMultiValueMap
+import org.springframework.web.client.RestTemplate
+import org.springframework.web.reactive.function.client.WebClient
 import java.io.ByteArrayInputStream
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.temporal.TemporalAdjusters
+import java.util.*
 
 @Service
-class GoogleCalendarService {
+class GoogleCalendarService(
+      private val userService: UserService,
+) {
 
       private val jsonFactory: JsonFactory = GsonFactory.getDefaultInstance()
       private val transport = GoogleNetHttpTransport.newTrustedTransport()
@@ -61,6 +72,74 @@ class GoogleCalendarService {
                   )
             }
       }
+
+      @Scheduled(cron = "0 0 1 * * ?", zone = "Europe/Stockholm")
+      fun refreshCalendarWatch(email: String = "robin.blondin@gmail.com") {
+            val newAccessToken = refreshAccessToken(email) ?: run {
+                  println(" Failed to refresh access token for $email")
+                  return
+            }
+            startWatchingCalendar(newAccessToken)
+      }
+
+      fun startWatchingCalendar(accessToken: String) {
+            val calendarId = dotenv?.get("CALENDAR_ID")
+            val watchUrl = "https://www.googleapis.com/calendar/v3/calendars/$calendarId/events/watch"
+
+            val payload = mapOf(
+                  "id" to UUID.randomUUID().toString(),
+                  "type" to "web_hook",
+                  "address" to "https://tvview.wassblondin.se/api/calendar/notifications",
+                  "params" to mapOf("ttl" to "86400")
+            )
+
+            WebClient.create()
+                  .post()
+                  .uri(watchUrl)
+                  .header("Authorization", "Bearer $accessToken")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .bodyValue(payload)
+                  .retrieve()
+                  .bodyToMono(String::class.java)
+                  .subscribe { response: String->
+                        println("Calendar  $response")
+                  }
+      }
+
+      private fun refreshAccessToken(email: String): String? {
+            val user = userService.findUserByEmail(email)
+
+            if(user.isEmpty) {
+                  throw RuntimeException("User not found: $email")
+            }
+
+            val refreshToken = user.get().refreshToken
+
+            val requestParams = LinkedMultiValueMap<String, String>().apply {
+                  add("client_id", dotenv?.get("GOOGLE_CLIENT_ID"))
+                  add("client_secret", dotenv?.get("GOOGLE_CLIENT_SECRET"))
+                  add("refresh_token", refreshToken)
+                  add("grant_type", "refresh_token")
+            }
+
+            val headers = HttpHeaders()
+            headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
+
+            val restTemplate = RestTemplate()
+            val requestEntity = HttpEntity(requestParams, headers)
+
+            val response = restTemplate.exchange(
+                  "https://oauth2.googleapis.com/token",
+                  HttpMethod.POST,
+                  requestEntity,
+                  Map::class.java
+            )
+
+            if (!response.statusCode.is2xxSuccessful) return null
+
+            return response.body?.get("access_token") as? String
+      }
+
 
       private fun getCredentials(): GoogleCredentials {
             val credentialsJson = dotenv?.get("CREDENTIALS_JSON")

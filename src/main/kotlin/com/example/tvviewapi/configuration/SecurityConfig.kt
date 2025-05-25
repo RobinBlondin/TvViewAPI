@@ -27,7 +27,7 @@ class SecurityConfig(
                   .csrf { csrf -> csrf.disable() }
                   .authorizeHttpRequests { auth ->
                         auth
-                              .requestMatchers("/auth/google", "/uploads/**",  "/ws").permitAll()
+                              .requestMatchers("/auth/google", "/uploads/**",  "/ws", "/api/calendar/notifications").permitAll()
                               .anyRequest().authenticated()
                   }
                   .oauth2ResourceServer { oauth2 ->
