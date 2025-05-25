@@ -35,7 +35,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server:3.4.2")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("org.springframework:spring-webflux:7.0.0-M5")
+    implementation("org.springframework:spring-webflux:6.2.7")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:latest.release")
     implementation("com.google.oauth-client:google-oauth-client-jetty:1.37.0")
     implementation("com.google.api-client:google-api-client:2.7.2")
