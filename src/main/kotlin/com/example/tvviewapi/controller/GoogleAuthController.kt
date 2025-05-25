@@ -60,7 +60,7 @@ class GoogleAuthController(
                   return ResponseEntity.status(tokenResponse.statusCode)
                         .body(mapOf("error" to "Failed to get access token"))
             }
-
+            println("tokenResponse: ${tokenResponse.body}")
             val accessToken = tokenResponse.body?.get("access_token") as? String
                   ?: return ResponseEntity.badRequest().body(mapOf("error" to "Invalid token response"))
 
