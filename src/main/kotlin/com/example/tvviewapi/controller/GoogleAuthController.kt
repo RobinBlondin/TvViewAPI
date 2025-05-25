@@ -103,8 +103,6 @@ class GoogleAuthController(
                   user.refreshToken = refreshToken ?: ""
             }
 
-            googleCalendarService.refreshCalendarWatch(email)
-
             val isTvViewRequest = request.isTvView
             val secretKey = Keys.hmacShaKeyFor(secret?.toByteArray(StandardCharsets.UTF_8))
             val tvToken = if (isTvViewRequest) Jwts.builder()
@@ -115,9 +113,7 @@ class GoogleAuthController(
                   .signWith(secretKey, Jwts.SIG.HS512)
                   .compact() else ""
 
-            if(tvToken.isNotBlank()) {
-                  googleCalendarService.startWatchingCalendar(accessToken)
-            }
+            googleCalendarService.startWatchingCalendar(accessToken)
 
             return ResponseEntity.ok(
                   mapOf(
