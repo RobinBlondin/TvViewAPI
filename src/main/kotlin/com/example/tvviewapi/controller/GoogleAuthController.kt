@@ -99,6 +99,7 @@ class GoogleAuthController(
             val user = userService.findUserByEmail(email)
                   .orElseThrow { RuntimeException("User not found: $email") }
 
+            println("Refresh Token: $refreshToken")
             if(user.refreshToken.isEmpty() || user.refreshToken.isBlank()) {
                   user.refreshToken = refreshToken ?: ""
                   userService.updateUser(user)
