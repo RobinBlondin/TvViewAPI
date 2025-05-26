@@ -25,6 +25,7 @@ class GoogleAuthController(
 ) {
       val dotenv: Dotenv? = Dotenv.configure().ignoreIfMissing().load()
       val secret: String? = dotenv?.get("JWT_SECRET")
+      val serviceEmail: String? = dotenv?.get("SERVICE_ACCOUNT_EMAIL")
 
       @PostMapping("/google")
       fun exchangeAuthCode(@RequestBody request: GoogleAuthRequestDto): ResponseEntity<Map<String, Any>> {
@@ -32,10 +33,9 @@ class GoogleAuthController(
             val clientId = request.clientId
             val clientSecret = request.clientSecret
             val redirectUri = request.redirectUri
-
             val restTemplate = RestTemplate()
 
-            // Step 1: Exchange auth code for access token (Google requires form-encoded data)
+
             val tokenParams = LinkedMultiValueMap<String, String>().apply {
                   add("client_id", clientId)
                   add("client_secret", clientSecret)
@@ -69,7 +69,6 @@ class GoogleAuthController(
             val idToken = tokenResponse.body?.get("id_token") as? String
                   ?: return ResponseEntity.badRequest().body(mapOf("error" to "Invalid token response"))
 
-            // Step 2: Use access token to get user info
             val userInfoHeaders = HttpHeaders()
             userInfoHeaders.setBearerAuth(accessToken)
             val userInfoRequestEntity = HttpEntity<Void>(userInfoHeaders)
@@ -91,22 +90,24 @@ class GoogleAuthController(
             val name = userInfo["name"] as? String ?: "Unknown"
             val picture = userInfo["picture"] as? String ?: ""
 
-            // Step 3: Check if user exists
+
             if (!userService.isRegisteredUser(email)) {
                   return ResponseEntity.status(403).body(mapOf("error" to "Unauthorized user"))
             }
-            println("Email: $email")
-            val user = userService.findUserByEmail(email)
-                  .orElseThrow { RuntimeException("User not found: $email") }
 
-            println("Refresh Token: $refreshToken")
-            user.refreshToken = refreshToken ?: ""
-            userService.updateUser(user)
+            if(request.isTvView) {
+                  val user = userService.findUserByEmail(serviceEmail ?: email)
+                        .orElseThrow { RuntimeException("User not found by email") }
 
+                  if(user.refreshToken == null || user.refreshToken!!.isEmpty()) {
+                        user.refreshToken = refreshToken ?: ""
+                        userService.updateUser(user)
+                        googleCalendarService.startWatchingCalendar(accessToken)
+                  }
+            }
 
-            val isTvViewRequest = request.isTvView
             val secretKey = Keys.hmacShaKeyFor(secret?.toByteArray(StandardCharsets.UTF_8))
-            val tvToken = if (isTvViewRequest) Jwts.builder()
+            val tvToken = if (request.isTvView) Jwts.builder()
                   .subject(email)
                   .issuedAt(Date())
                   .expiration(Date(System.currentTimeMillis() + 90L * 24 * 60 * 60 * 1000))
@@ -114,7 +115,7 @@ class GoogleAuthController(
                   .signWith(secretKey, Jwts.SIG.HS512)
                   .compact() else ""
 
-            googleCalendarService.startWatchingCalendar(accessToken)
+
 
             return ResponseEntity.ok(
                   mapOf(

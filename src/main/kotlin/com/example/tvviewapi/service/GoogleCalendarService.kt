@@ -33,7 +33,8 @@ class GoogleCalendarService(
 
       private val jsonFactory: JsonFactory = GsonFactory.getDefaultInstance()
       private val transport = GoogleNetHttpTransport.newTrustedTransport()
-      val dotenv: Dotenv? = Dotenv.configure().ignoreIfMissing().load()
+      private val dotenv: Dotenv? = Dotenv.configure().ignoreIfMissing().load()
+      private val serviceEmail: String? = dotenv?.get("SERVICE_ACCOUNT_EMAIL")
 
       fun getCalendarEvents(): List<CalendarEventDto> {
 
@@ -75,9 +76,8 @@ class GoogleCalendarService(
 
       @Scheduled(cron = "0 0 3 * * ?", zone = "Europe/Stockholm")
       fun refreshCalendarWatch() {
-            val email = "robin.blondin@gmail.com"
-            val newAccessToken = refreshAccessToken(email) ?: run {
-                  println(" Failed to refresh access token for $email")
+            val newAccessToken = refreshAccessToken() ?: run {
+                  println(" Failed to refresh access token")
                   return
             }
             startWatchingCalendar(newAccessToken)
@@ -109,11 +109,11 @@ class GoogleCalendarService(
                   }
       }
 
-      private fun refreshAccessToken(email: String): String? {
-            val user = userService.findUserByEmail(email)
+      private fun refreshAccessToken(): String? {
+            val user = userService.findUserByEmail(serviceEmail!!)
 
             if(user.isEmpty) {
-                  throw RuntimeException("User not found: $email")
+                  throw RuntimeException("User not found: $serviceEmail")
             }
 
             val refreshToken = user.get().refreshToken
