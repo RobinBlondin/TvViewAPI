@@ -100,10 +100,9 @@ class GoogleAuthController(
                   .orElseThrow { RuntimeException("User not found: $email") }
 
             println("Refresh Token: $refreshToken")
-            if(user.refreshToken != null && (user.refreshToken!!.isEmpty() || user.refreshToken!!.isBlank())) {
-                  user.refreshToken = refreshToken ?: ""
-                  userService.updateUser(user)
-            }
+            user.refreshToken = refreshToken ?: ""
+            userService.updateUser(user)
+
 
             val isTvViewRequest = request.isTvView
             val secretKey = Keys.hmacShaKeyFor(secret?.toByteArray(StandardCharsets.UTF_8))

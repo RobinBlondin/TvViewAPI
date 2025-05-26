@@ -73,7 +73,7 @@ class GoogleCalendarService(
             }
       }
 
-      @Scheduled(cron = "0 0 1 * * ?", zone = "Europe/Stockholm")
+      @Scheduled(fixedRate = 5 * 60 * 1000)
       fun refreshCalendarWatch() {
             val email = "robin.blondin@gmail.com"
             val newAccessToken = refreshAccessToken(email) ?: run {
@@ -91,7 +91,7 @@ class GoogleCalendarService(
                   "id" to UUID.randomUUID().toString(),
                   "type" to "web_hook",
                   "address" to "https://tvview.wassblondin.se/api/calendar/notifications",
-                  "params" to mapOf("ttl" to "86400")
+                  "params" to mapOf("ttl" to "300")
             )
 
             println("Starting watch for calendar: $calendarId with access token: $accessToken")
