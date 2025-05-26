@@ -119,8 +119,8 @@ class GoogleCalendarService(
             val refreshToken = user.get().refreshToken
 
             val requestParams = LinkedMultiValueMap<String, String>().apply {
-                  add("client_id", dotenv?.get("GOOGLE_CLIENT_ID"))
-                  add("client_secret", dotenv?.get("GOOGLE_CLIENT_SECRET"))
+                  add("client_id", dotenv?.get("FRONTEND_GOOGLE_CLIENT_ID"))
+                  add("client_secret", dotenv?.get("FRONTEND_GOOGLE_CLIENT_SECRET"))
                   add("refresh_token", refreshToken)
                   add("grant_type", "refresh_token")
             }
