@@ -12,7 +12,6 @@ It functions as an OAuth2 Resource Server, handling authenticated requests from 
 
 - **Kotlin** + Spring Boot
 - Java 21
-- PostgreSQL
 - OAuth2 with Google
 - JWT Authentication
 - REST API
@@ -26,6 +25,84 @@ It functions as an OAuth2 Resource Server, handling authenticated requests from 
 - Docker (for PostgreSQL, if desired)
 - PostgreSQL running on port 5432 (or configure otherwise)
 - `.env` file in your project root (see below)
+
+---
+
+### Google Cloud Console Setup
+
+Before running the application, you need to set up a Google Cloud Console project and configure OAuth2 credentials:
+
+#### 1. Create a Google Cloud Project
+
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select an existing one
+3. Enable the following APIs:
+   - Google Calendar API
+   - Google+ API (for profile information)
+
+#### 2. Configure OAuth2 Consent Screen
+
+1. Navigate to **APIs & Services** > **OAuth consent screen**
+2. Choose **External** user type (unless you're using Google Workspace)
+3. Fill in the required information:
+   - App name: `TV View API`
+   - User support email: Your email
+   - Developer contact information: Your email
+4. Add scopes:
+   - `openid`
+   - `profile`
+   - `email`
+   - `https://www.googleapis.com/auth/calendar.readonly`
+5. Add test users (your email addresses that will use the app)
+
+#### 3. Create OAuth2 Credentials
+
+1. Navigate to **APIs & Services** > **Credentials**
+2. Click **Create Credentials** > **OAuth 2.0 Client IDs**
+3. Choose **Web application** as the application type
+4. Configure the following:
+
+   **For Backend OAuth2 Client:**
+   - Name: `TV View API`
+   - Authorized JavaScript origins:
+     ```
+     http://localhost:8080
+     https://your_own_domain (Optional)
+     ```
+   - Authorized redirect URIs:
+     ```
+     http://localhost:8080/login/oauth2/code/google
+     http://localhost:8080/auth/google
+     https://your_own_domain/login/oauth2/code/google (Optional)
+     https://your_own_domain/auth/google (Optional)
+     ```
+
+5. Download the JSON credentials
+
+#### 4. Create a Service Account
+
+1. Navigate to **APIs & Services** > **Credentials**
+2. Click **Create Credentials** > **Service Account**
+3. Fill in the service account details:
+   - Name: `tv-view-service-account`
+   - Description: `Service account for TV View API calendar access`
+4. Grant the service account the **Calendar API** access
+5. Click **Done**
+6. Click on the created service account
+7. Go to the **Keys** tab
+8. Click **Add Key** > **Create new key** > **JSON**
+9. Download the JSON key file - this will be your `credentials.json`
+
+#### 5. Share Your Calendar
+
+1. Open Google Calendar
+2. Find the calendar you want to display
+3. Click the three dots next to the calendar name > **Settings and sharing**
+4. Under **Share with specific people**, add the service account email (found in the credentials.json file)
+5. Give it **See all event details** permission
+6. Copy the **Calendar ID** from the **Integrate calendar** section and use in environment variables.
+
+---
 
 ### Environment Configuration
 
@@ -43,18 +120,26 @@ GOOGLE_CLIENT_SECRET=your_google_client_secret
 GOOGLE_REDIRECT_URI=http://localhost:8080/login/oauth2/code/google
 GOOGLE_CLIENT_SCOPE=openid,profile,email,https://www.googleapis.com/auth/calendar.readonly
 
+FRONTEND_GOOGLE_CLIENT_ID=<your_google_client_id_for_frontend_app>
+FRONTEND_GOOGLE_CLIENT_SECRET=<your_google_client_secret_for_frontend_app>
+
 CREDENTIALS=/path/to/credentials.json
 CREDENTIALS_JSON=contents_of_credentials.json_file_as_a_string
 
-CALENDAR_ID=your_calendar_id (usually your_email@gmail.com)
+CALENDAR_ID=your_calendar_id
+CALENDAR_WATCH_URL=https://www.googleapis.com/calendar/v3/calendars/<your_calendar_id>/events/watch
+CALENDAR_WATCH_CALLBACK_URL=https://your_domain/api/calendar/notifications
 
 COMMUTE_API_KEY=your_resrobot_api_key
 COMMUTE_STOP_ID=your_commute_stop_id (e.g. 740000605)
 
 FILE_UPLOAD_DIR=http://localhost:8081/uploads
 
+SERVICE_ACCOUNT_EMAIL=<email_for_applications_service_account>
+
 JWT_SECRET=your_jwt_secret (must be at least 64 characters for HS512)
 ```
+NOTE: CALENDAR_WATCH_CALLBACK_URL must be a HTTPS-url, since google can only send push notifications to secure urls. 
 
 ### Run the App
 
