@@ -84,17 +84,20 @@ class GoogleCalendarService(
       }
 
       fun startWatchingCalendar(accessToken: String) {
-            val calendarId = dotenv?.get("CALENDAR_ID")
-            val watchUrl = "https://www.googleapis.com/calendar/v3/calendars/$calendarId/events/watch"
+            val watchUrl = dotenv?.get("CALENDAR_WATCH_URL")
+                  ?: throw RuntimeException("CALENDAR_WATCH_URL environment variable is missing")
+
+            val callbackUrl = dotenv.get("CALENDAR_WATCH_CALLBACK_URL")
+                  ?: throw RuntimeException("CALENDAR_WATCH_CALLBACK_URL environment variable is missing")
 
             val payload = mapOf(
                   "id" to UUID.randomUUID().toString(),
                   "type" to "web_hook",
-                  "address" to "https://tvview.wassblondin.se/api/calendar/notifications",
+                  "address" to callbackUrl,
                   "params" to mapOf("ttl" to "86400")
             )
 
-            println("Starting watch for calendar: $calendarId with access token: $accessToken")
+            println("Starting watch for calendar")
 
             WebClient.create()
                   .post()
@@ -111,12 +114,9 @@ class GoogleCalendarService(
 
       private fun refreshAccessToken(): String? {
             val user = userService.findUserByEmail(serviceEmail!!)
+                  .orElseThrow { RuntimeException("User not found: $serviceEmail") }
 
-            if(user.isEmpty) {
-                  throw RuntimeException("User not found: $serviceEmail")
-            }
-
-            val refreshToken = user.get().refreshToken
+            val refreshToken = user.refreshToken
 
             val requestParams = LinkedMultiValueMap<String, String>().apply {
                   add("client_id", dotenv?.get("FRONTEND_GOOGLE_CLIENT_ID"))
