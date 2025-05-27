@@ -26,6 +26,8 @@ It functions as an OAuth2 Resource Server, handling authenticated requests from 
 - PostgreSQL running on port 5432 (or configure otherwise)
 - `.env` file in your project root (see below)
 
+---
+
 ### Google Cloud Console Setup
 
 Before running the application, you need to set up a Google Cloud Console project and configure OAuth2 credentials:
@@ -100,6 +102,8 @@ Before running the application, you need to set up a Google Cloud Console projec
 5. Give it **See all event details** permission
 6. Copy the **Calendar ID** from the **Integrate calendar** section
 
+---
+
 ### Environment Configuration
 
 Create a `.env` file in your project root:
@@ -122,7 +126,9 @@ FRONTEND_GOOGLE_CLIENT_SECRET=<your_google_client_secret_for_frontend_app>
 CREDENTIALS=/path/to/credentials.json
 CREDENTIALS_JSON=contents_of_credentials.json_file_as_a_string
 
-CALENDAR_ID=your_calendar_id (owner email of calendar)
+CALENDAR_ID=your_calendar_id
+CALENDAR_WATCH_URL=https://www.googleapis.com/calendar/v3/calendars/<your_calendar_id>/events/watch
+CALENDAR_WATCH_CALLBACK_URL=https://your_domain/api/calendar/notifications
 
 COMMUTE_API_KEY=your_resrobot_api_key
 COMMUTE_STOP_ID=your_commute_stop_id (e.g. 740000605)
@@ -133,6 +139,7 @@ SERVICE_ACCOUNT_EMAIL=<email_for_applications_service_account>
 
 JWT_SECRET=your_jwt_secret (must be at least 64 characters for HS512)
 ```
+NOTE: CALENDAR_WATCH_CALLBACK_URL must be a HTTPS-url, since google can only send push notifications to secure urls. 
 
 ### Run the App
 
