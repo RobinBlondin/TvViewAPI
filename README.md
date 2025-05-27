@@ -100,7 +100,7 @@ Before running the application, you need to set up a Google Cloud Console projec
 3. Click the three dots next to the calendar name > **Settings and sharing**
 4. Under **Share with specific people**, add the service account email (found in the credentials.json file)
 5. Give it **See all event details** permission
-6. Copy the **Calendar ID** from the **Integrate calendar** section
+6. Copy the **Calendar ID** from the **Integrate calendar** section and use in environment variables.
 
 ---
 
