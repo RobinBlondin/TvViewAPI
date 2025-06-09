@@ -1,6 +1,8 @@
 package com.example.tvviewapi.service
 
 import com.example.tvviewapi.dto.CalendarEventDto
+import com.example.tvviewapi.dto.CalendarWatchDto
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
 import com.google.api.client.json.JsonFactory
 import com.google.api.client.json.gson.GsonFactory
@@ -29,6 +31,7 @@ import java.util.*
 @Service
 class GoogleCalendarService(
       private val userService: UserService,
+      private val calendarWatchService: CalendarWatchService
 ) {
 
       private val jsonFactory: JsonFactory = GsonFactory.getDefaultInstance()
@@ -76,8 +79,10 @@ class GoogleCalendarService(
 
       @Scheduled(cron = "0 0 3 * * ?", zone = "Europe/Stockholm")
       fun refreshCalendarWatch() {
-            val newAccessToken = refreshAccessToken() ?: run {
-                  println(" Failed to refresh access token")
+            val newAccessToken = calendarWatchService.stopAllCalendarWatches()
+
+            if( newAccessToken == null ) {
+                  println("Failed to refresh access token for calendar watch")
                   return
             }
             startWatchingCalendar(newAccessToken)
@@ -109,10 +114,20 @@ class GoogleCalendarService(
                   .bodyToMono(String::class.java)
                   .subscribe { response: String->
                         println("Calendar  $response")
+                        val mapper = ObjectMapper()
+                        val json = mapper.readTree(response)
+
+                        val dto = CalendarWatchDto(
+                              channelId = json.get("id").asText(),
+                              resourceId = json.get("resourceId").asText(),
+                        )
+
+                        calendarWatchService.saveCalendarWatch(dto)
+
                   }
       }
 
-      private fun refreshAccessToken(): String? {
+      fun refreshAccessToken(): String? {
             val user = userService.findUserByEmail(serviceEmail!!)
                   .orElseThrow { RuntimeException("User not found: $serviceEmail") }
 
