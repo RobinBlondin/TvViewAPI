@@ -79,7 +79,7 @@ class GoogleCalendarService(
 
       @Scheduled(cron = "0 0 3 * * ?", zone = "Europe/Stockholm")
       fun refreshCalendarWatch() {
-            val newAccessToken = calendarWatchService.stopAllCalendarWatches()
+            val newAccessToken = stopAllCalendarWatches()
 
             if( newAccessToken == null ) {
                   println("Failed to refresh access token for calendar watch")
@@ -125,6 +125,27 @@ class GoogleCalendarService(
                         calendarWatchService.saveCalendarWatch(dto)
 
                   }
+      }
+
+      fun stopAllCalendarWatches(): String? {
+            val watches = calendarWatchService.getAllCalendarWatches()
+            calendarWatchService.deleteAllCalendarWatches()
+            val accessToken = refreshAccessToken()
+            watches.forEach { watch ->
+                  val payload = mapOf(
+                        "id" to watch.channelId,
+                        "resourceId" to watch.resourceId
+                  )
+
+                  WebClient
+                        .create()
+                        .post()
+                        .uri("https://www.googleapis.com/calendar/v3/channels/stop")
+                        .header("Authorization", "Bearer $accessToken")
+                        .header("Content-Type", "application/json")
+                        .bodyValue(payload)
+            }
+            return accessToken
       }
 
       fun refreshAccessToken(): String? {
