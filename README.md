@@ -3,7 +3,7 @@
 A Kotlin Spring Boot backend for displaying calendar events, uploading files, tracking public transportation departures, and more.
 This project serves as the backend for the companion frontend, TvViewWeb: https://github.com/RobinBlondin/TvViewWeb.
 
-It functions as an OAuth2 Resource Server, handling authenticated requests from the frontend and integrating various third-party services into a unified API.
+It functions as an OAuth2 Resource Server, handling authenticated requests from the frontend and integrating various third party services into a unified API.
 
 ![image](https://github.com/user-attachments/assets/be826092-1baa-4f3d-81d7-21fe0f9a9434)
 
