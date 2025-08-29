@@ -13,6 +13,7 @@ import com.google.auth.http.HttpCredentialsAdapter
 import com.google.auth.oauth2.GoogleCredentials
 import com.google.auth.oauth2.ServiceAccountCredentials
 import io.github.cdimascio.dotenv.Dotenv
+import jakarta.annotation.PostConstruct
 import org.springframework.http.MediaType
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
@@ -33,6 +34,11 @@ class GoogleCalendarService(
       private val transport = GoogleNetHttpTransport.newTrustedTransport()
       private val dotenv: Dotenv? = Dotenv.configure().ignoreIfMissing().load()
       private val serviceAccount: String? = dotenv?.get("SERVICE_ACCOUNT_JSON")
+
+      @PostConstruct
+      fun init() {
+            refreshCalendarWatch()
+      }
 
       fun getCalendarEvents(): List<CalendarEventDto> {
 
