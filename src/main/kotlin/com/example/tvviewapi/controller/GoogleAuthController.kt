@@ -1,7 +1,6 @@
 package com.example.tvviewapi.controller
 
 import com.example.tvviewapi.dto.GoogleAuthRequestDto
-import com.example.tvviewapi.service.GoogleCalendarService
 import com.example.tvviewapi.service.UserService
 import io.github.cdimascio.dotenv.Dotenv
 import io.jsonwebtoken.Jwts
@@ -20,12 +19,10 @@ import java.util.*
 @RestController
 @RequestMapping("/auth")
 class GoogleAuthController(
-      private val userService: UserService,
-      private val googleCalendarService: GoogleCalendarService
+      private val userService: UserService
 ) {
       val dotenv: Dotenv? = Dotenv.configure().ignoreIfMissing().load()
       val secret: String? = dotenv?.get("JWT_SECRET")
-      val serviceEmail: String? = dotenv?.get("SERVICE_ACCOUNT_EMAIL")
 
       @PostMapping("/google")
       fun exchangeAuthCode(@RequestBody request: GoogleAuthRequestDto): ResponseEntity<Map<String, Any>> {
@@ -34,7 +31,6 @@ class GoogleAuthController(
             val clientSecret = request.clientSecret
             val redirectUri = request.redirectUri
             val restTemplate = RestTemplate()
-
 
             val tokenParams = LinkedMultiValueMap<String, String>().apply {
                   add("client_id", clientId)
@@ -63,8 +59,6 @@ class GoogleAuthController(
             println("tokenResponse: ${tokenResponse.body}")
             val accessToken = tokenResponse.body?.get("access_token") as? String
                   ?: return ResponseEntity.badRequest().body(mapOf("error" to "Invalid token response"))
-
-            val refreshToken = tokenResponse.body?.get("refresh_token") as? String
 
             val idToken = tokenResponse.body?.get("id_token") as? String
                   ?: return ResponseEntity.badRequest().body(mapOf("error" to "Invalid token response"))
@@ -95,18 +89,10 @@ class GoogleAuthController(
                   return ResponseEntity.status(403).body(mapOf("error" to "Unauthorized user"))
             }
 
-            if(request.isTvView) {
-                  val user = userService.findUserByEmail(serviceEmail ?: email)
-                        .orElseThrow { RuntimeException("User not found by email") }
+            val secretKey = Keys.hmacShaKeyFor(
+                  requireNotNull(secret) { "JWT_SECRET must be set" }.toByteArray(StandardCharsets.UTF_8)
+            )
 
-                  if(user.refreshToken == null || user.refreshToken!!.isEmpty()) {
-                        user.refreshToken = refreshToken ?: ""
-                        userService.updateUser(user)
-                        googleCalendarService.startWatchingCalendar(accessToken)
-                  }
-            }
-
-            val secretKey = Keys.hmacShaKeyFor(secret?.toByteArray(StandardCharsets.UTF_8))
             val tvToken = if (request.isTvView) Jwts.builder()
                   .subject(email)
                   .issuedAt(Date())
@@ -114,8 +100,6 @@ class GoogleAuthController(
                   .claim("is_tv_token", true)
                   .signWith(secretKey, Jwts.SIG.HS512)
                   .compact() else ""
-
-
 
             return ResponseEntity.ok(
                   mapOf(
