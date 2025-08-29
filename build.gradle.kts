@@ -1,11 +1,11 @@
 plugins {
-    kotlin("jvm") version "1.9.25"
-    kotlin("plugin.spring") version "1.9.25"
+    kotlin("jvm") version "2.2.0"
+    kotlin("plugin.spring") version "2.2.0"
     id("org.springframework.boot") version "3.4.2"
     id("io.spring.dependency-management") version "1.1.7"
-    id("org.jetbrains.kotlin.kapt") version "1.9.25"
-    kotlin("plugin.jpa") version "1.9.25"
-    kotlin("plugin.serialization") version "1.9.0"
+    id("org.jetbrains.kotlin.kapt") version "2.2.0"
+    kotlin("plugin.jpa") version "2.2.0"
+    kotlin("plugin.serialization") version "2.2.0"
 }
 
 
@@ -36,7 +36,6 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server:3.4.2")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.springframework:spring-webflux:6.2.7")
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:latest.release")
     implementation("com.google.oauth-client:google-oauth-client-jetty:1.37.0")
     implementation("com.google.api-client:google-api-client:2.7.2")
     implementation("com.google.apis:google-api-services-calendar:v3-rev20250115-2.0.0")
@@ -61,7 +60,6 @@ dependencies {
     testImplementation("com.h2database:h2:2.3.232")
     testImplementation("io.mockk:mockk:1.14.2")
     testImplementation("com.ninja-squad:springmockk:4.0.2")
-
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
