@@ -11,15 +11,11 @@ import com.google.api.services.calendar.Calendar
 import com.google.api.services.calendar.model.Events
 import com.google.auth.http.HttpCredentialsAdapter
 import com.google.auth.oauth2.GoogleCredentials
+import com.google.auth.oauth2.ServiceAccountCredentials
 import io.github.cdimascio.dotenv.Dotenv
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
-import org.springframework.util.LinkedMultiValueMap
-import org.springframework.web.client.RestTemplate
 import org.springframework.web.reactive.function.client.WebClient
 import java.io.ByteArrayInputStream
 import java.time.DayOfWeek
@@ -30,14 +26,13 @@ import java.util.*
 
 @Service
 class GoogleCalendarService(
-      private val userService: UserService,
       private val calendarWatchService: CalendarWatchService
 ) {
 
       private val jsonFactory: JsonFactory = GsonFactory.getDefaultInstance()
       private val transport = GoogleNetHttpTransport.newTrustedTransport()
       private val dotenv: Dotenv? = Dotenv.configure().ignoreIfMissing().load()
-      private val serviceEmail: String? = dotenv?.get("SERVICE_ACCOUNT_EMAIL")
+      private val serviceAccount: String? = dotenv?.get("SERVICE_ACCOUNT_JSON")
 
       fun getCalendarEvents(): List<CalendarEventDto> {
 
@@ -130,7 +125,7 @@ class GoogleCalendarService(
       fun stopAllCalendarWatches(): String? {
             val watches = calendarWatchService.getAllCalendarWatches()
             calendarWatchService.deleteAllCalendarWatches()
-            val accessToken = refreshAccessToken()
+            val accessToken = getServiceAccountAccessToken()
             watches.forEach { watch ->
                   val payload = mapOf(
                         "id" to watch.channelId,
@@ -142,43 +137,29 @@ class GoogleCalendarService(
                         .post()
                         .uri("https://www.googleapis.com/calendar/v3/channels/stop")
                         .header("Authorization", "Bearer $accessToken")
-                        .header("Content-Type", "application/json")
+                        .contentType(MediaType.APPLICATION_JSON)
                         .bodyValue(payload)
+                        .retrieve()
+                        .toBodilessEntity()
+                        .doOnSuccess {
+                              println("Stopped watch ${watch.channelId} (${watch.resourceId})")
+                        }
+                        .doOnError { error ->
+                              println("Failed to stop watch ${watch.channelId}: ${error.message}")
+                        }
+                        .subscribe()
             }
             return accessToken
       }
 
-      fun refreshAccessToken(): String? {
-            val user = userService.findUserByEmail(serviceEmail!!)
-                  .orElseThrow { RuntimeException("User not found: $serviceEmail") }
+      fun getServiceAccountAccessToken(): String {
+            val credentials = ServiceAccountCredentials
+                  .fromStream(ByteArrayInputStream(serviceAccount?.toByteArray()))
+                  .createScoped(listOf("https://www.googleapis.com/auth/calendar"))
 
-            val refreshToken = user.refreshToken
-
-            val requestParams = LinkedMultiValueMap<String, String>().apply {
-                  add("client_id", dotenv?.get("FRONTEND_GOOGLE_CLIENT_ID"))
-                  add("client_secret", dotenv?.get("FRONTEND_GOOGLE_CLIENT_SECRET"))
-                  add("refresh_token", refreshToken)
-                  add("grant_type", "refresh_token")
-            }
-
-            val headers = HttpHeaders()
-            headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
-
-            val restTemplate = RestTemplate()
-            val requestEntity = HttpEntity(requestParams, headers)
-
-            val response = restTemplate.exchange(
-                  "https://oauth2.googleapis.com/token",
-                  HttpMethod.POST,
-                  requestEntity,
-                  Map::class.java
-            )
-
-            if (!response.statusCode.is2xxSuccessful) return null
-
-            return response.body?.get("access_token") as? String
+            credentials.refreshIfExpired()
+            return credentials.accessToken.tokenValue
       }
-
 
       private fun getCredentials(): GoogleCredentials {
             val credentialsJson = dotenv?.get("CREDENTIALS_JSON")
@@ -189,7 +170,6 @@ class GoogleCalendarService(
             return GoogleCredentials.fromStream(credentialsStream)
                   .createScoped(listOf("https://www.googleapis.com/auth/calendar.readonly"))
       }
-
 
       private fun getWeekStartAndEnd(): Pair<DateTime, DateTime> {
             val zoneId = ZoneId.systemDefault()
@@ -208,5 +188,4 @@ class GoogleCalendarService(
 
             return Pair(startDateTime, endDateTime)
       }
-
 }
