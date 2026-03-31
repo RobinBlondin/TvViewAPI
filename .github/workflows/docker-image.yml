@@ -35,9 +35,14 @@ jobs:
       - name: Remove credentials.json
         run: rm -f credentials.json
 
-      - name: Trigger VPS deploy hook
-        env:
-          DEPLOY_URL: ${{ secrets.DEPLOY_URL }}
-        run: |
-          curl -X POST $DEPLOY_URL \
-            -H "Authorization: Bearer ${{ secrets.VPS_WEBHOOK_TOKEN }}"
+      - name: SSH into server, pull and deploy latest image from Docker Hub
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_PRIVATE_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          script: |
+            cd /opt/apps
+            docker compose pull tvview_api 
+            docker compose up -d --no-deps tvview_api
