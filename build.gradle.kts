@@ -6,6 +6,7 @@ plugins {
     id("org.jetbrains.kotlin.kapt") version "2.2.0"
     kotlin("plugin.jpa") version "2.2.0"
     kotlin("plugin.serialization") version "2.2.0"
+    kotlin("plugin.lombok") version "2.2.0"
 }
 
 
@@ -32,18 +33,19 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
     implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("software.amazon.awssdk:s3:2.57.3")
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server:3.4.2")
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("org.springframework:spring-webflux:6.2.7")
+    implementation("org.springframework:spring-webflux")
     implementation("com.google.oauth-client:google-oauth-client-jetty:1.37.0")
     implementation("com.google.api-client:google-api-client:2.7.2")
     implementation("com.google.apis:google-api-services-calendar:v3-rev20250115-2.0.0")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.18.2")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.22.4")
     implementation("io.github.cdimascio:dotenv-java:latest.release")
     implementation("org.mapstruct:mapstruct:latest.release")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    implementation("org.springframework.boot:spring-boot-starter-websocket:3.4.2")
+    implementation("org.springframework.boot:spring-boot-starter-websocket")
     implementation("io.jsonwebtoken:jjwt-api:0.12.6")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
@@ -61,6 +63,7 @@ dependencies {
     testImplementation("io.mockk:mockk:1.14.2")
     testImplementation("com.ninja-squad:springmockk:4.0.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation(kotlin("test"))
 }
 
 kotlin {
