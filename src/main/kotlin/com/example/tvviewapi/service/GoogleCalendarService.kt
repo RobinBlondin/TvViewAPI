@@ -33,7 +33,8 @@ class GoogleCalendarService(
       private val jsonFactory: JsonFactory = GsonFactory.getDefaultInstance()
       private val transport = GoogleNetHttpTransport.newTrustedTransport()
       private val dotenv: Dotenv? = Dotenv.configure().ignoreIfMissing().load()
-      private val serviceAccount: String? = dotenv?.get("SERVICE_ACCOUNT_JSON")
+      private val serviceAccount: String? =
+            System.getenv("SERVICE_ACCOUNT_JSON") ?: dotenv?.get("SERVICE_ACCOUNT_JSON")
 
       @PostConstruct
       fun init() {
@@ -46,7 +47,7 @@ class GoogleCalendarService(
                   .setApplicationName("TvViewApi")
                   .build()
 
-            val calendarId = dotenv?.get("CALENDAR_ID")
+            val calendarId = System.getenv("CALENDAR_ID") ?: dotenv?.get("CALENDAR_ID")
                   ?: throw RuntimeException("CALENDAR_ID environment variable is missing")
 
             val eventTimeSpan = getWeekStartAndEnd()
@@ -90,11 +91,11 @@ class GoogleCalendarService(
       }
 
       fun startWatchingCalendar(accessToken: String) {
-            val watchUrl = dotenv?.get("CALENDAR_WATCH_URL")
-                  ?: throw RuntimeException("CALENDAR_WATCH_URL environment variable is missing")
+            val watchUrl = System.getenv("CALENDAR_WATCH_URL")
+                  ?: dotenv?.get("CALENDAR_WATCH_URL")
 
-            val callbackUrl = dotenv.get("CALENDAR_WATCH_CALLBACK_URL")
-                  ?: throw RuntimeException("CALENDAR_WATCH_CALLBACK_URL environment variable is missing")
+            val callbackUrl = System.getenv("CALENDAR_WATCH_CALLBACK_URL")
+                  ?: dotenv?.get("CALENDAR_WATCH_CALLBACK_URL")
 
             val payload = mapOf(
                   "id" to UUID.randomUUID().toString(),
@@ -107,7 +108,7 @@ class GoogleCalendarService(
 
             WebClient.create()
                   .post()
-                  .uri(watchUrl)
+                  .uri(watchUrl!!)
                   .header("Authorization", "Bearer $accessToken")
                   .contentType(MediaType.APPLICATION_JSON)
                   .bodyValue(payload)
@@ -168,7 +169,7 @@ class GoogleCalendarService(
       }
 
       private fun getCredentials(): GoogleCredentials {
-            val credentialsJson = dotenv?.get("CREDENTIALS_JSON")
+            val credentialsJson = System.getenv("CREDENTIALS_JSON") ?: dotenv?.get("CREDENTIALS_JSON")
                   ?: throw RuntimeException("CREDENTIALS_JSON environment variable is missing")
 
 

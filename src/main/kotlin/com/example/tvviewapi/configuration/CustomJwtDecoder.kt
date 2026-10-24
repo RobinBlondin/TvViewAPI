@@ -12,23 +12,28 @@ import javax.crypto.spec.SecretKeySpec
 
 @Component
 class CustomJwtDecoder : JwtDecoder {
-      private val googleJwtDecoder: NimbusJwtDecoder = NimbusJwtDecoder.withJwkSetUri("https://www.googleapis.com/oauth2/v3/certs").build()
-      private val dotenv: Dotenv? = Dotenv.configure().ignoreIfMissing().load()
-      private val secret: String? = dotenv?.get("JWT_SECRET")
-      private val customSecret = secret?.toByteArray(StandardCharsets.UTF_8)
-      private val customSecretKey = SecretKeySpec(customSecret, "HmacSHA512")
+    private val googleJwtDecoder: NimbusJwtDecoder =
+        NimbusJwtDecoder.withJwkSetUri("https://www.googleapis.com/oauth2/v3/certs").build()
+    private val dotenv: Dotenv? = Dotenv.configure().ignoreIfMissing().load()
+    private val secret: String = requireNotNull(
+        System.getenv("JWT_SECRET") ?: dotenv?.get("JWT_SECRET")
+    ) {
+        "JWT_SECRET is missing"
+    }
+    private val customSecret = secret.toByteArray(StandardCharsets.UTF_8)
+    private val customSecretKey = SecretKeySpec(customSecret, "HmacSHA512")
 
-      private val customJwtDecoder: NimbusJwtDecoder = NimbusJwtDecoder
-            .withSecretKey(customSecretKey)
-            .macAlgorithm(MacAlgorithm.HS512)
-            .build()
+    private val customJwtDecoder: NimbusJwtDecoder = NimbusJwtDecoder
+        .withSecretKey(customSecretKey)
+        .macAlgorithm(MacAlgorithm.HS512)
+        .build()
 
-      override fun decode(token: String): Jwt {
-            return try {
-                  googleJwtDecoder.decode(token)
-            } catch (ex: JwtException) {
-                  println("Failed to decode JWT with Google decoder, trying custom decoder" + ex.message)
-                  customJwtDecoder.decode(token)
-            }
-      }
+    override fun decode(token: String): Jwt {
+        return try {
+            googleJwtDecoder.decode(token)
+        } catch (ex: JwtException) {
+            println("Failed to decode JWT with Google decoder, trying custom decoder" + ex.message)
+            customJwtDecoder.decode(token)
+        }
+    }
 }
