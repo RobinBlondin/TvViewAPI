@@ -41,7 +41,7 @@ dependencies {
     implementation("com.google.oauth-client:google-oauth-client-jetty:1.37.0")
     implementation("com.google.api-client:google-api-client:2.7.2")
     implementation("com.google.apis:google-api-services-calendar:v3-rev20250115-2.0.0")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.22.4")
+    implementation("com.fasterxml.jackson.core:jackson-databind")
     implementation("io.github.cdimascio:dotenv-java:latest.release")
     implementation("org.mapstruct:mapstruct:latest.release")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
