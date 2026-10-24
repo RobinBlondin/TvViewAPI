@@ -1,5 +1,6 @@
 package com.example.tvviewapi.controller
 
+import com.example.tvviewapi.service.R2StorageService
 import io.github.cdimascio.dotenv.Dotenv
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
@@ -14,33 +15,30 @@ import kotlin.io.path.exists
 
 @RestController
 @RequestMapping("/api/files")
-class FileUploadController {
+class FileUploadController(
+      private val r2StorageService: R2StorageService
+) {
 
-      private val uploadDir = Paths.get("uploads")
       private val dotenv: Dotenv? = Dotenv.configure().ignoreIfMissing().load()
-
-      init {
-            if(!uploadDir.exists()) {
-                  Files.createDirectories(uploadDir)
-            }
-      }
 
       @PostMapping("upload")
       fun uploadFile(@RequestParam("file") file: MultipartFile): ResponseEntity<String> {
 
-            if(file.contentType?.contains("image") != true) {
-                  return ResponseEntity.badRequest()
-                        .header("X-Request-ID", "File type is not valid")
-                        .build()
+            if(file.isEmpty || file.contentType?.startsWith("image/") != true) {
+                  return ResponseEntity.badRequest().build()
             }
 
             val timestamp = LocalDateTime.now().toString().replace(":", "-")
             val fileName = "$timestamp-${file.originalFilename}".replace(" ", "_")
-            val filePath = uploadDir.resolve(fileName)
 
-            Files.copy(file.inputStream, filePath)
+            r2StorageService.upload(
+                  fileName = fileName,
+                  bytes = file.bytes,
+                  contentType = file.contentType!!
+            )
 
-            val storedUrl =  dotenv?.get("FILE_UPLOAD_DIR")  + "/$fileName"
+            val storedUrl = (System.getenv("FILE_UPLOAD_DIR")
+                  ?: dotenv?.get("FILE_UPLOAD_DIR"))  + "/$fileName"
             return ResponseEntity.ok().body(storedUrl)
       }
 }
