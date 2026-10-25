@@ -22,15 +22,22 @@ class GoogleAuthController(
       private val userService: UserService
 ) {
       val dotenv: Dotenv? = Dotenv.configure().ignoreIfMissing().load()
-      val secret: String? = dotenv?.get("JWT_SECRET")
+      val secret: String? =
+                  System.getenv("JWT_SECRET") ?: dotenv?.get("JWT_SECRET")
 
       @PostMapping("/google")
       fun exchangeAuthCode(@RequestBody request: GoogleAuthRequestDto): ResponseEntity<Map<String, Any>> {
             val authCode = request.code
-            val clientId = request.clientId
-            val clientSecret = request.clientSecret
             val redirectUri = request.redirectUri
             val restTemplate = RestTemplate()
+
+            val clientId = System.getenv("FRONTEND_GOOGLE_CLIENT_ID")
+                  ?: dotenv?.get("FRONTEND_GOOGLE_CLIENT_ID")
+                  ?: error("FRONTEND_GOOGLE_CLIENT_ID missing")
+
+            val clientSecret = System.getenv("FRONTEND_GOOGLE_CLIENT_SECRET")
+                  ?: dotenv?.get("FRONTEND_GOOGLE_CLIENT_SECRET")
+                  ?: error("FRONTEND_GOOGLE_CLIENT_SECRET missing")
 
             val tokenParams = LinkedMultiValueMap<String, String>().apply {
                   add("client_id", clientId)
@@ -56,7 +63,7 @@ class GoogleAuthController(
                   return ResponseEntity.status(tokenResponse.statusCode)
                         .body(mapOf("error" to "Failed to get access token"))
             }
-            println("tokenResponse: ${tokenResponse.body}")
+
             val accessToken = tokenResponse.body?.get("access_token") as? String
                   ?: return ResponseEntity.badRequest().body(mapOf("error" to "Invalid token response"))
 
